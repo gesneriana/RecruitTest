@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecruitWeb", "RecruitWeb\RecruitWeb.csproj", "{14BB5C5C-25FD-4489-8E26-9B0100C5B6A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecruitWeb", "RecruitWeb\RecruitWeb.csproj", "{14BB5C5C-25FD-4489-8E26-9B0100C5B6A5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Recruit.Models", "Recruit.Models\Recruit.Models.csproj", "{FB287078-49CE-414D-BC1D-A8B8E2CEA0B5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{CAB535DF-07FA-4508-B2DC-73106057ED8C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{92186B14-73D5-4CA6-AE18-5D542C375032}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Recruit.Data", "Recruit.Data\Recruit.Data.csproj", "{E4FE9E51-FB3D-44D3-865E-26781946B257}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,22 @@ Global
 		{14BB5C5C-25FD-4489-8E26-9B0100C5B6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14BB5C5C-25FD-4489-8E26-9B0100C5B6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14BB5C5C-25FD-4489-8E26-9B0100C5B6A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB287078-49CE-414D-BC1D-A8B8E2CEA0B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB287078-49CE-414D-BC1D-A8B8E2CEA0B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB287078-49CE-414D-BC1D-A8B8E2CEA0B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB287078-49CE-414D-BC1D-A8B8E2CEA0B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAB535DF-07FA-4508-B2DC-73106057ED8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAB535DF-07FA-4508-B2DC-73106057ED8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAB535DF-07FA-4508-B2DC-73106057ED8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAB535DF-07FA-4508-B2DC-73106057ED8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92186B14-73D5-4CA6-AE18-5D542C375032}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92186B14-73D5-4CA6-AE18-5D542C375032}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92186B14-73D5-4CA6-AE18-5D542C375032}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92186B14-73D5-4CA6-AE18-5D542C375032}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4FE9E51-FB3D-44D3-865E-26781946B257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4FE9E51-FB3D-44D3-865E-26781946B257}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4FE9E51-FB3D-44D3-865E-26781946B257}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4FE9E51-FB3D-44D3-865E-26781946B257}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

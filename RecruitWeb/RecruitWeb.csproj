@@ -6,10 +6,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
+    <PackageReference Include="npgsql" Version="3.2.6" />
+    <PackageReference Include="npgsql.entityframeworkcore.postgresql" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Recruit.Data\Recruit.Data.csproj" />
+    <ProjectReference Include="..\Recruit.Models\Recruit.Models.csproj" />
   </ItemGroup>
 
 </Project>
