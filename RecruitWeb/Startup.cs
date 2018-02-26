@@ -31,13 +31,13 @@ namespace RecruitWeb
             switch (DbServerName)
             {
                 case "npgsql":
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("npgsql_connstr")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("npgsql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
                 case "sqlserver":
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("sqlserver_connstr")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("sqlserver_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
                 case "mysql":
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
 
                 default:

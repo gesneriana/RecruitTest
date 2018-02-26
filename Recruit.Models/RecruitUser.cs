@@ -8,6 +8,7 @@ namespace Recruit.Models
 {
     /// <summary>
     /// 管理员用户验证密码, 面试者仅判断身份证前面14位和姓名
+    /// 用户类设计的比较简单, 等以后有空了可能会全部重构, 暂时时间匆忙
     /// </summary>
     public class RecruitUser
     {

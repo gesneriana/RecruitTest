@@ -1,0 +1,16 @@
+﻿Add-Migration init	
+
+初始化创建数据库,创建表, 但是索引和唯一键需要在初始化器中使用sql命令操作,
+这部分内容较少并且跨平台性强, 基本上不用做修改
+
+Update-Database –TargetMigration:"201309201643300_AddCity.cs"
+
+版本回溯
+
+Update-Database -Verbose
+
+查看执行的sql语句
+
+Update-Database -Script -SourceMigration:"201309201643300_AddCity.cs" -TargetMigration:"201309201708043_ModifyCity.cs"
+
+生成不同的版本之间的sql脚本, 例如 alter 语句
