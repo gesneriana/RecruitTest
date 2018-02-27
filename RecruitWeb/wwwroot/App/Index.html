@@ -10,12 +10,51 @@
 
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row center-block" style="width:1200px;min-height:50px;line-height:50px;">
-            <div class="col-lg-3 col-lg-offset-9">
-                <a href="" class="btn btn-primary">登录</a>
-                <a href="" class="btn btn-xs"></a>
+    <div id="app">
+        <div class="container-fluid">
+            <div class="row center-block" style="width:1200px;min-height:50px;line-height:50px;">
+
+
+                <!-- v-show="hasToken" -->
+                <div v-show="false" class="col-lg-3 col-lg-offset-9">
+                    <a href="" class="btn btn-primary">登录</a>
+                    <a href="" class="btn btn-xs">注册</a>
+                </div>
             </div>
+        </div>
+
+        <div class="center-block" style="width:1200px;min-height:600px;">
+
+            <div class="center-block" v-if="bodyContent=='login'" style="width:600px;">
+                <!-- 登录表单,如果以登录则不会显示 -->
+                <form class="form-horizontal" role="form">
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">用户名:</label>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" autocomplete="on" id="uname" v-model="uname" placeholder="昵称,手机号,邮箱" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">密码:</label>
+                        <div class="col-md-8">
+                            <input type="password" class="form-control" id="pwd" v-model="pwd" placeholder="" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-md-2 col-md-offset-3">
+                            <button type="button" v-on:click="getJwtToken" class="btn btn-primary">登录</button>
+
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" @click="showCookieToken" class="btn btn-block">注册</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
         </div>
     </div>
 
@@ -28,7 +67,97 @@
 
     <script src="../lib/jquery/dist/jquery.js"></script>
     <script src="../lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="../js/vue.js"></script>
+    <script src="../js/vue-resource.js"></script>
     <script src="../js/site.js"></script>
+    <script type="text/javascript">
 
+        //读Cookie
+        function getCookie(objName) {//获取指定名称的cookie的值
+            var arrStr = document.cookie.split("; ");
+            for (var i = 0; i < arrStr.length; i++) {
+                var temp = arrStr[i].split("=");
+                if (temp[0] == objName) return unescape(temp[1]);
+            }
+            return "";
+        }
+        //设置cookie的值
+        function setCookie(cname, cvalue, exHours) {
+            var d = new Date();
+            console.log(cname + '/' + cvalue + '/' + exHours)
+            d.setTime(d.getTime() + (exHours * 60 * 60 * 1000));
+            var expires = "expires=" + d.toGMTString();
+            document.cookie = cname + "=" + escape(cvalue) + "; " + expires;
+            console.log(document.cookie);
+        }
+
+        // 使用表单数据传输参数
+        Vue.http.options.emulateJSON = true;
+
+        // Vue请求拦截器, 可以在请求开始前和请求后做一些额外的事情
+        Vue.http.interceptors.push(function (request, next) {
+            // 请求发送前的处理逻辑
+
+            // ...设置请求头的token
+            var token = getCookie("token");
+            if (token.length > 0) {
+                request.headers.set('Authorization', token);
+            }
+
+            next(function (response) {
+                // ...
+                // 请求发送后的处理逻辑
+                // ...
+                // 根据请求的状态，response参数会返回给successCallback或errorCallback
+                return response
+            })
+        })
+
+        // 当前html页面的Vue实例
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                userData: {},
+                hasToken: true,
+                bodyContent: 'init',
+                uname: '',  // 登录表单的用户名
+                pwd: '' //登录表单的密码
+            },
+
+            // 初始化的函数, 相当于ready
+            mounted: function () {
+                if (getCookie("token").length > 0) {
+                    // 有token, 但是可能过期, 隐藏登陆和注册按钮
+                    this.$data.hasToken = true;
+                } else {
+                    // 没有token, 显示登录的模板
+                    this.$data.bodyContent = "login";
+                }
+            },
+
+            // vue监听的方法
+            methods: {
+                // 登录api, 获取token
+                getJwtToken: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/account/login',
+                        body: { uname: this.uname, pwd: this.pwd },
+                        timeout: 3000,
+                    }).then(function (response) {
+                        if (response.status == 200) {
+                            setCookie("token", response.body.token_type + ' ' + response.body.access_token, response.body.expires_in);
+                            alert(response.body);
+                        } else {
+                            alert(response);
+                        }
+                    });
+                },
+                showCookieToken: function () {
+                    alert(getCookie("token"));
+                }
+            }
+        });
+    </script>
 </body>
 </html>

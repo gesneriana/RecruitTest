@@ -9,6 +9,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="npgsql" Version="3.2.6" />
     <PackageReference Include="npgsql.entityframeworkcore.postgresql" Version="2.0.1" />
+    <PackageReference Include="vue-resource" Version="1.3.4" />
   </ItemGroup>
 
   <ItemGroup>

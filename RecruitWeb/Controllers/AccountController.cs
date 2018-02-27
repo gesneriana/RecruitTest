@@ -34,12 +34,14 @@ namespace RecruitWeb.Controllers
         {
             if (string.IsNullOrWhiteSpace(uname) || string.IsNullOrEmpty(pwd))
             {
+                HttpContext.Response.StatusCode = 400;
                 return Json("参数错误");
             }
 
-            var user = dbContext.recruit_user.Where(x => (x.nickname.Equals(uname) || x.email.Equals(uname) || x.phone.Equals(uname)) && x.pwd.Equals(Sha1.getSha1String(uname + pwd))).FirstOrDefault();
+            var user = dbContext.recruit_user.Where(x => (x.nickname.Equals(uname) || x.email.Equals(uname) || x.phone.Equals(uname)) && x.pwd.Equals(Sha1.getSha1String(pwd))).FirstOrDefault();
             if (user == null)
             {
+                HttpContext.Response.StatusCode = 400;
                 return Json("用户或者密码错误");
             }
             else
@@ -61,7 +63,7 @@ namespace RecruitWeb.Controllers
                 var response = new
                 {
                     access_token = encodedJwt,
-                    expires_in = DateTime.Now.AddHours(24),
+                    expires_in = 24,    // 24小时
                     token_type = "Bearer"
                 };
 
