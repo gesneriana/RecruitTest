@@ -25,7 +25,11 @@
 
         <div class="center-block" style="width:1200px;min-height:600px;">
 
-            <div class="center-block" v-if="bodyContent=='login'" style="width:600px;">
+            <div v-if="bodyContent=='init'" class="center-block" style="width:600px;">
+                <button type="button" @click="testToken">测试token是否有效</button>
+            </div>
+
+            <div v-if="bodyContent=='login'" class="center-block" style="width:600px;">
                 <!-- 登录表单,如果以登录则不会显示 -->
                 <form class="form-horizontal" role="form">
 
@@ -49,11 +53,12 @@
 
                         </div>
                         <div class="col-md-2">
-                            <button type="button" @click="showCookieToken" class="btn btn-block">注册</button>
+                            <button type="button" @click="" class="btn btn-block">注册</button>
                         </div>
                     </div>
                 </form>
             </div>
+
 
         </div>
     </div>
@@ -153,8 +158,18 @@
                         }
                     });
                 },
-                showCookieToken: function () {
-                    alert(getCookie("token"));
+                testToken: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/account/CheckToken',
+                        timeout: 3000,
+                    }).then(function (response) {
+                        if (response.status == 200) {
+                            alert(response.body);
+                        } else {
+                            alert(response);
+                        }
+                    });
                 }
             }
         });

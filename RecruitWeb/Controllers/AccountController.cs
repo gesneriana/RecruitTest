@@ -11,12 +11,14 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using RecruitWeb.Token;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RecruitWeb.Controllers
 {
     /// <summary>
     /// 用户账户控制器, 颁发token, 登录, 注销, 权限授予的功能
     /// </summary>
+    [Route("api/[controller]/[action]/{id?}")]
     public class AccountController : Controller
     {
 
@@ -29,8 +31,8 @@ namespace RecruitWeb.Controllers
             memoryCache = cache;
         }
 
-        [Route("api/[controller]/login")]
-        public IActionResult Login(string uname, string pwd)
+        [HttpPost]
+        public IActionResult Login([FromForm]string uname, [FromForm]string pwd)
         {
             if (string.IsNullOrWhiteSpace(uname) || string.IsNullOrEmpty(pwd))
             {
@@ -53,12 +55,14 @@ namespace RecruitWeb.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, date.ToString(), ClaimValueTypes.Integer64),
                 };
+
                 JwtSecurityToken jwt = new JwtSecurityToken(
                 issuer: "Asuna",
                 audience: user.phone,
                 claims: claims,
                 expires: DateTime.Now.AddHours(24),
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Asuna2yhciUyMHdvbmclMFWfsaZlJTIwLm5ldA==")), SecurityAlgorithms.HmacSha256));
+                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Asuna2yhciUyMHdvbmclMFWfsaZlJTIwLm5ldA==")), SecurityAlgorithms.HmacSha256)
+                );
                 var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
                 var response = new
                 {
@@ -72,6 +76,12 @@ namespace RecruitWeb.Controllers
 
                 return Json(response);
             }
+        }
+
+        [Authorize("test")]
+        public IActionResult CheckToken()
+        {
+            return Content("请求成功");
         }
     }
 }
