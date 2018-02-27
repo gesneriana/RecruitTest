@@ -9,8 +9,9 @@ namespace Recruit.Models
     /// <summary>
     /// 管理员用户验证密码, 面试者仅判断身份证前面14位和姓名
     /// 用户类设计的比较简单, 等以后有空了可能会全部重构, 暂时时间匆忙
+    /// 由于pgsql和mysql表名和字段区分大小写, 而且默认自动转换为小写, 所以更改命名规则为下划线
     /// </summary>
-    public class RecruitUser
+    public class recruit_user
     {
         /// <summary>
         /// 自定义的主键, 创建的时候有默认值, 不需要手动赋值

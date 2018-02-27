@@ -9,7 +9,7 @@ namespace RecruitWeb.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "RecruitUser",
+                name: "recruit_user",
                 columns: table => new
                 {
                     uuid = table.Column<string>(nullable: false),
@@ -28,14 +28,14 @@ namespace RecruitWeb.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecruitUser", x => x.uuid);
+                    table.PrimaryKey("PK_recruit_user", x => x.uuid);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RecruitUser");
+                name: "recruit_user");
         }
     }
 }

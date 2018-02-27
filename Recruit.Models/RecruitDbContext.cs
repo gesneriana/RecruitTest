@@ -10,7 +10,7 @@ namespace Recruit.Models
 
         public RecruitDbContext(DbContextOptions<RecruitDbContext> options) : base(options)
         {
-            
+
         }
 
         /// <summary>
@@ -23,8 +23,8 @@ namespace Recruit.Models
         }
 
         /// <summary>
-        /// 用户实体类, 初始化的时候应该创建唯一索引, create unique index ix_RecruitUser_nickname on RecruitUser (nickname)
+        /// 用户实体类, 初始化的时候应该创建唯一键
         /// </summary>
-        public DbSet<RecruitUser> RecruitUser { get; set; }
+        public DbSet<recruit_user> recruit_user { get; set; }
     }
 }

@@ -11,7 +11,7 @@ using System;
 namespace RecruitWeb.Migrations
 {
     [DbContext(typeof(RecruitDbContext))]
-    [Migration("20180226132055_init")]
+    [Migration("20180227004842_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace RecruitWeb.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
-            modelBuilder.Entity("Recruit.Models.RecruitUser", b =>
+            modelBuilder.Entity("Recruit.Models.recruit_user", b =>
                 {
                     b.Property<string>("uuid")
                         .ValueGeneratedOnAdd();
@@ -59,7 +59,7 @@ namespace RecruitWeb.Migrations
 
                     b.HasKey("uuid");
 
-                    b.ToTable("RecruitUser");
+                    b.ToTable("recruit_user");
                 });
 #pragma warning restore 612, 618
         }

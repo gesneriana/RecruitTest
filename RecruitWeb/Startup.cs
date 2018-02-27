@@ -12,6 +12,10 @@ using Recruit.Data;
 
 namespace RecruitWeb
 {
+
+    /// <summary>
+    /// 尽量减少初始化代码的操作, 否则第一次启动会卡顿, 数据库初始化只会在第一次部署才执行
+    /// </summary>
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -42,7 +46,7 @@ namespace RecruitWeb
 
                 default:
                     // 默认使用mysql
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
             }
             #endregion
@@ -70,12 +74,13 @@ namespace RecruitWeb
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
+            #region 自动创建数据库, 并且初始化测试数据, 创建唯一键和索引等
             try
             {
                 using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
                 {
                     var dbContext = serviceScope.ServiceProvider.GetService<RecruitDbContext>();
-                    var hasCreated = dbContext.Database.EnsureCreated();
+                    var hasCreated = dbContext.Database.EnsureCreated();    // 这个代码是发布以后方便其他的一件部署的功能
                     if (hasCreated)
                     {
                         var dbInitializer = new RecruitWebSampleDataInitializer(dbContext);
@@ -88,7 +93,7 @@ namespace RecruitWeb
             {
                 throw ex;
             }
-
+            #endregion
         }
     }
 }

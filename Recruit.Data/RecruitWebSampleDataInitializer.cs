@@ -24,9 +24,10 @@ namespace Recruit.Data
         /// <returns></returns>
         public async Task InitTableSchema()
         {
-            dbContext.Database.ExecuteSqlCommand("alter table \"RecruitUser\" add constraint unique_RecruitUser_nickname unique (nickname);");
-            dbContext.Database.ExecuteSqlCommand("alter table \"RecruitUser\" add constraint unique_RecruitUser_phone unique (phone);");
-            dbContext.Database.ExecuteSqlCommand("alter table \"RecruitUser\" add constraint unique_RecruitUser_email unique (email);");
+            // 数据库表名和字段名不能写死, 因为可能会在后面重构阶段更改
+            dbContext.Database.ExecuteSqlCommand(string.Format("alter table {0} add constraint unique_RecruitUser_nickname unique ({1});", nameof(recruit_user), nameof(recruit_user.nickname)));
+            dbContext.Database.ExecuteSqlCommand(string.Format("alter table {0} add constraint unique_RecruitUser_phone unique ({1});", nameof(recruit_user), nameof(recruit_user.phone)));
+            dbContext.Database.ExecuteSqlCommand(string.Format("alter table {0} add constraint unique_RecruitUser_email unique ({1});", nameof(recruit_user), nameof(recruit_user.email)));
 
             await dbContext.SaveChangesAsync();
         }
@@ -37,8 +38,8 @@ namespace Recruit.Data
         /// <returns></returns>
         public async Task InitDatabaseData()
         {
-            dbContext.RecruitUser.Add(new RecruitUser() { nickname = "asuna", uname = "江郎才尽", cardno = "42112719941208", email = "s694060865@gmail.com", phone = "17666293366", role = "user", pwd = Sha1.getSha1String("asuna" + "angel.") });
-            dbContext.RecruitUser.Add(new RecruitUser() { nickname = "才众电脑", uname = "才众电脑", email = "s694060865@163.com", phone = "17665271050", role = "company", pwd = Sha1.getSha1String("才众电脑" + "kotori.") });
+            dbContext.recruit_user.Add(new recruit_user() { nickname = "asuna", uname = "江郎才尽", cardno = "42112719941208", email = "s694060865@gmail.com", phone = "17666293366", role = "user", pwd = Sha1.getSha1String("asuna" + "angel.") });
+            dbContext.recruit_user.Add(new recruit_user() { nickname = "才众电脑", uname = "才众电脑", email = "s694060865@163.com", phone = "17665271050", role = "company", pwd = Sha1.getSha1String("才众电脑" + "kotori.") });
 
             await dbContext.SaveChangesAsync();
         }
