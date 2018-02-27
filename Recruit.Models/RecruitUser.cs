@@ -45,13 +45,13 @@ namespace Recruit.Models
         public string pwd { get; set; }
 
         /// <summary>
-        /// 手机号,面试者必填, 唯一索引
+        /// 手机号, 必填, 唯一索引
         /// </summary>
         [Phone]
         public string phone { get; set; } = string.Empty;
 
         /// <summary>
-        /// 邮件,面试者必填, 唯一索引
+        /// 邮件, 必填, 唯一索引
         /// </summary>
         [EmailAddress]
         public string email { get; set; } = string.Empty;
