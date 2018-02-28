@@ -48,6 +48,7 @@ namespace Recruit.Models
         /// 手机号, 必填, 唯一索引
         /// </summary>
         [Phone]
+        [MaxLength(20)]
         public string phone { get; set; } = string.Empty;
 
         /// <summary>
@@ -66,22 +67,26 @@ namespace Recruit.Models
         /// <summary>
         /// 公司名称, 公司用户必填
         /// </summary>
+        [MaxLength(50)]
         public string CompanyName { get; set; } = string.Empty;
 
         /// <summary>
         /// 公司地址, 公司用户必填
         /// </summary>
+        [MaxLength(200)]
         public string CompanyAddress { get; set; } = string.Empty;
 
         /// <summary>
         /// 公司联系方式,非必填
         /// </summary>
+        [MaxLength(50)]
         public string CompanyContact { get; set; } = string.Empty;
 
         /// <summary>
         /// 权限, admin , user ,company , 
         /// 因为不想看见null, 所以都给了默认值, 这是强迫症, 
         /// </summary>
+        [MaxLength(50)]
         public string role { get; set; } = string.Empty;
 
         /// <summary>

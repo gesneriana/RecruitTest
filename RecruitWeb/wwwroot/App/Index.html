@@ -38,14 +38,14 @@
 
                     <div class="form-group">
                         <label class="col-md-3 control-label">用户名:</label>
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <input type="text" class="form-control" autocomplete="on" id="uname" v-model="uname" placeholder="昵称,手机号,邮箱" />
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="col-md-3 control-label">密码:</label>
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <input type="password" class="form-control" id="pwd" v-model="pwd" placeholder="" />
                         </div>
                     </div>
@@ -63,7 +63,17 @@
             </div>
 
             <div v-if="bodyContent=='SignInUser'" class="center-block" style="width:600px;">
-                注册
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label">注册类型:</label>
+                        <div class="col-md-9">
+                            <select v-model="signUserData.role">
+                                <option value="user">个人</option>
+                                <option value="company">公司</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -137,7 +147,21 @@
         var vm = new Vue({
             el: '#app',
             data: {
-                userData: {},
+                signUserData:
+                {
+                    nickname: '',
+                    pwd: '',
+                    uname: '',
+                    CompanyAddress: '',
+                    CompanyCode: '',
+                    CompanyContact: '',
+                    CompanyName: '',
+                    cardno: '',
+                    email: '',
+                    nickname: '',
+                    phone: '',
+                    role=''
+                },
                 hasToken: false,
                 bodyContent: 'init',
                 uname: '',  // 登录表单的用户名
