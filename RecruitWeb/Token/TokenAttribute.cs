@@ -105,7 +105,7 @@ namespace RecruitWeb.Token
                                 else
                                 {
                                     err.HttpStatusCode = 403;
-                                    err.ErrorType = ConstantTypeString.TokenError;
+                                    err.ErrorType = ConstantTypeString.UnAuthorization;
                                     err.ErrorMessage = "你没有所需的权限";
                                     context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
                                     return;

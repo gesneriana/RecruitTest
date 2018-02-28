@@ -18,6 +18,11 @@ namespace RecruitWeb.Models
         public const string TokenError = "TokenError";
 
         /// <summary>
+        /// 权限不够
+        /// </summary>
+        public const string UnAuthorization = "UnAuthorization";
+
+        /// <summary>
         /// 400系列的错误
         /// </summary>
         public const string NotFound = "NotFound";
