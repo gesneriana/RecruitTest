@@ -18,6 +18,7 @@ using JWT.Serializers;
 using Microsoft.Extensions.Configuration;
 using RecruitWeb.Configuration;
 using Microsoft.Extensions.Options;
+using RecruitWeb.Models;
 
 namespace RecruitWeb.Controllers
 {
@@ -30,8 +31,6 @@ namespace RecruitWeb.Controllers
 
         RecruitDbContext dbContext;
 
-        IMemoryCache MemoryCache;
-
         static JwtTokenConfig jwtTokenConfig;
 
         /// <summary>
@@ -40,82 +39,100 @@ namespace RecruitWeb.Controllers
         /// <param name="dbContext"></param>
         /// <param name="cache"></param>
         /// <param name="jwtConfig"></param>
-        public AccountController(RecruitDbContext dbContext, IMemoryCache cache, IOptions<JwtTokenConfig> jwtConfig)
+        public AccountController(RecruitDbContext dbContext, IOptions<JwtTokenConfig> jwtConfig)
         {
             this.dbContext = dbContext;
-            MemoryCache = cache;
             jwtTokenConfig = jwtConfig.Value;
-            Config.cache = cache;   // 请求到达action方法之前, 初始化缓存配置
         }
 
         [HttpPost]
         public IActionResult Login([FromForm]string uname, [FromForm]string pwd)
         {
+            var err = new ErrorRequestData();
+            err.Description = HttpContext.Request.GetAbsoluteUri();
+
             if (string.IsNullOrWhiteSpace(uname) || string.IsNullOrEmpty(pwd))
             {
-                HttpContext.Response.StatusCode = 400;
-                return Json("参数错误");
+                err.HttpStatusCode = 401;
+                err.ErrorType = ConstantTypeString.TokenError;
+                err.ErrorMessage = "参数错误";
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
             }
 
             var user = dbContext.recruit_user.Where(x => (x.nickname.Equals(uname) || x.email.Equals(uname) || x.phone.Equals(uname)) && x.pwd.Equals(Sha1.getSha1String(pwd))).FirstOrDefault();
             if (user == null)
             {
-                HttpContext.Response.StatusCode = 400;
-                return Json("用户或者密码错误");
+                err.HttpStatusCode = 403;
+                err.ErrorType = ConstantTypeString.TokenError;
+                err.ErrorMessage = "用户或者密码错误";
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
             }
-            else
+
+            try
             {
-                try
-                {
+                var guid = Guid.NewGuid().ToString();   // 唯一标识
 
-
-                    var guid = Guid.NewGuid().ToString();   // 唯一标识
-
-                    var payload = new Dictionary<string, object>()
+                var payload = new Dictionary<string, object>()
                     {
                         { "jti", guid}
                     };
 
-                    string secret = jwtTokenConfig.Secret;
-                    IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
-                    IJsonSerializer serializer = new JsonNetSerializer();
-                    IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
-                    IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
+                string secret = jwtTokenConfig.Secret;
+                IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
+                IJsonSerializer serializer = new JsonNetSerializer();
+                IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
 
-                    var jwtToken = encoder.Encode(payload, secret);  // 生成jwtToken
-                    DateTime utcNow = DateTime.UtcNow;
-                    var userClaims = new List<Claim>();
-                    // 可以添加多个role , 但是role type 必须相同
-                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                var jwtToken = encoder.Encode(payload, secret);  // 生成jwtToken
+                DateTime utcNow = DateTime.UtcNow;
 
-                    // 将用户token保存到内存缓存
-                    MemoryCacheService.SetChacheValue(guid,
-                        new SignedUser()
-                        {
-                            guid = guid,
-                            Audience = jwtTokenConfig.Audience,
-                            Issuer = jwtTokenConfig.Issuer,
-                            utc_time = utcNow,
-                            user_token = jwtToken,
-                            user_phone = user.phone,
-                            user_claims = userClaims,
-                            Validity = jwtTokenConfig.Validity,
-                            TokenType = jwtTokenConfig.TokenType
-                        });
-
-                    // 将token写入响应流中
-                    var response = new { token = jwtToken, expires_in = jwtTokenConfig.Validity, token_type = jwtTokenConfig.TokenType };
-                    return Json(response);
-                }
-                catch (Exception ex)
+                // 可以添加多个role , 但是role type 必须相同, 如果是正式的产品, 这里需要单独提取一张权限表, 仅做测试阶段使用
+                var userClaims = new List<Claim>();
+                if (user.role.Equals("admin"))
                 {
-                    return new ContentResult() { Content = ex.Message, StatusCode = 500 };
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), "user"));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), "company"));
+                }
+                else if (user.role.Equals("company"))
+                {
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), "user"));
+                }
+                else
+                {
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
                 }
 
+                // 将用户token保存到内存缓存
+                MemoryCacheService.SetChacheValue(guid,
+                    new SignedUser()
+                    {
+                        guid = guid,
+                        Audience = jwtTokenConfig.Audience,
+                        Issuer = jwtTokenConfig.Issuer,
+                        utc_time = utcNow,
+                        user_token = jwtToken,
+                        user_phone = user.phone,
+                        user_claims = userClaims,
+                        Validity = jwtTokenConfig.Validity,
+                        TokenType = jwtTokenConfig.TokenType
+                    });
+
+                // 将token写入响应流中
+                var response = new { token = jwtToken, expires_in = jwtTokenConfig.Validity, token_type = jwtTokenConfig.TokenType };
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                err.HttpStatusCode = 500;
+                err.ErrorType = ConstantTypeString.TokenError;
+                err.ErrorMessage = ex.Message;
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
             }
         }
 
-        [Token(role = "admin")]
+        [Token(role = "user")]
         public IActionResult CheckToken()
         {
             return Content("请求成功");

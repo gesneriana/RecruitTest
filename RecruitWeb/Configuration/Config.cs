@@ -18,9 +18,5 @@ namespace RecruitWeb.Configuration
         /// </summary>
         public static IConfiguration configuration { get; set; }
 
-        /// <summary>
-        /// 内存缓存
-        /// </summary>
-        public static IMemoryCache cache { get; set; }
     }
 }

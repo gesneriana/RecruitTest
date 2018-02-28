@@ -7,7 +7,7 @@ using System.Text;
 namespace Common
 {
     /// <summary>
-    /// 缓存帮助类
+    /// 缓存帮助类, 如果想要使用分布式缓存, 可以使用redis
     /// </summary>
     public static class MemoryCacheService
     {

@@ -36,7 +36,6 @@ namespace RecruitWeb
         public void ConfigureServices(IServiceCollection services)
         {
             Config.configuration = Configuration;
-            services.AddMemoryCache();  // 内存缓存, 如果系统太大了, 可以考虑拆分到redis, 也就是分布式token
             services.AddMvc();
             services.AddOptions();
             // 加载JwtTokenConfig的配置文件

@@ -115,15 +115,16 @@
                 // 请求发送后的处理逻辑
                 // ...
                 // 根据请求的状态，response参数会返回给successCallback或errorCallback
-                if (response.status == 401) {
-                    if (response.body == 'tokenInvalid') {
+                if (response.status >= 400) {
+                    alert(response.body.ErrorMessage);  // 显示错误信息, 也可以弹出模态框显示
+                    if (response.body.ErrorType == 'TokenError') {
                         setCookie("token", ''); // 清除token, 重新加载
                         location.reload();
                     }
                 }
                 return response
             })
-        })
+        });
 
         // 当前html页面的Vue实例
         var vm = new Vue({
@@ -172,11 +173,7 @@
                         url: '/api/account/CheckToken',
                         timeout: 3000,
                     }).then(function (response) {
-                        if (response.status == 200) {
-                            alert(response.body);
-                        } else {
-                            alert(response);
-                        }
+                        alert(response.body);
                     });
                 }
             }
