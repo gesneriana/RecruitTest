@@ -132,7 +132,11 @@ namespace RecruitWeb.Controllers
             }
         }
 
-        [Token(role = "user")]
+        /// <summary>
+        /// 基本的权限, 只要是登录了就能通过验证
+        /// </summary>
+        /// <returns></returns>
+        [Token(role = "user", showMsgBox = false)]
         public IActionResult CheckToken()
         {
             return Content("请求成功");

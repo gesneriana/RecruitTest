@@ -54,6 +54,11 @@ namespace RecruitWeb.Models
         public string ErrorType { get; set; }
 
         /// <summary>
+        /// 是否显示弹窗口提示错误信息
+        /// </summary>
+        public bool ShowMsgBox { get; set; }
+
+        /// <summary>
         /// 错误信息
         /// </summary>
         public string ErrorMessage { get; set; }

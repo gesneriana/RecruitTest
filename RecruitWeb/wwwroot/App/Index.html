@@ -14,11 +14,14 @@
         <div class="container-fluid">
             <div class="row center-block" style="width:1200px;min-height:50px;line-height:50px;">
 
-
                 <!-- v-show="hasToken" -->
                 <div v-show="false" class="col-lg-3 col-lg-offset-9">
                     <a href="" class="btn btn-primary">登录</a>
                     <a href="" class="btn btn-xs">注册</a>
+                </div>
+
+                <div v-show="hasToken" class="col-lg-3 col-lg-offset-9">
+                    <a href="" @click="signUp" class="btn btn-primary">注销</a>
                 </div>
             </div>
         </div>
@@ -53,13 +56,15 @@
 
                         </div>
                         <div class="col-md-2">
-                            <button type="button" @click="" class="btn btn-block">注册</button>
+                            <button type="button" @click="signIn" class="btn btn-block">注册</button>
                         </div>
                     </div>
                 </form>
             </div>
 
-
+            <div v-if="bodyContent=='SignInUser'" class="center-block" style="width:600px;">
+                注册
+            </div>
         </div>
     </div>
 
@@ -116,7 +121,9 @@
                 // ...
                 // 根据请求的状态，response参数会返回给successCallback或errorCallback
                 if (response.status >= 400) {
-                    alert(response.body.ErrorMessage);  // 显示错误信息, 也可以弹出模态框显示
+                    if (response.body.ShowMsgBox) {
+                        alert(response.body.ErrorMessage);  // 显示错误信息, 也可以弹出模态框显示
+                    }
                     if (response.body.ErrorType == 'TokenError') {
                         setCookie("token", ''); // 清除token, 重新加载
                         location.reload();
@@ -131,7 +138,7 @@
             el: '#app',
             data: {
                 userData: {},
-                hasToken: true,
+                hasToken: false,
                 bodyContent: 'init',
                 uname: '',  // 登录表单的用户名
                 pwd: '' //登录表单的密码
@@ -142,6 +149,7 @@
                 if (getCookie("token").length > 0) {
                     // 有token, 但是可能过期, 隐藏登陆和注册按钮
                     this.$data.hasToken = true;
+                    this.testToken();   // 验证token是否有效
                 } else {
                     // 没有token, 显示登录的模板
                     this.$data.bodyContent = "login";
@@ -159,6 +167,7 @@
                         timeout: 3000,
                     }).then(function (response) {
                         if (response.status == 200) {
+                            this.hasToken = true;
                             setCookie("token", response.body.token, response.body.expires_in);
                             setCookie("token_type", response.body.token_type, response.body.expires_in);
                             this.$data.bodyContent = 'init';
@@ -167,14 +176,24 @@
                         }
                     });
                 },
+                // 验证token是否有效的方法
                 testToken: function () {
                     this.$http({
                         method: 'post',
                         url: '/api/account/CheckToken',
                         timeout: 3000,
                     }).then(function (response) {
-                        alert(response.body);
+                        console.info(response.body);
                     });
+                },
+                // 注销
+                signUp: function () {
+                    setCookie("token", '');
+                    this.bodyContent = 'login';
+                },
+                // 打开注册界面
+                signIn: function () {
+                    this.bodyContent = 'SignInUser';
                 }
             }
         });

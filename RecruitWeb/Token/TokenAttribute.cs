@@ -23,6 +23,11 @@ namespace RecruitWeb.Token
     {
 
         /// <summary>
+        /// 是否显示弹窗口提示错误信息, 默认显示
+        /// </summary>
+        public bool showMsgBox { get; set; } = true;
+
+        /// <summary>
         /// 权限规则, 访问某个action所需要的权限, 
         /// 一个用户可以有多个权限, 但只需要满足这一个就可以了
         /// </summary>
@@ -31,6 +36,7 @@ namespace RecruitWeb.Token
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             var err = new ErrorRequestData();
+            err.ShowMsgBox = showMsgBox;
             err.Description = context.HttpContext.Request.GetAbsoluteUri();
 
             if (!context.HttpContext.Request.Headers.ContainsKey("token_type"))
