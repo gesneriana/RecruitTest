@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RecruitWeb.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
         public IActionResult Index()
         {

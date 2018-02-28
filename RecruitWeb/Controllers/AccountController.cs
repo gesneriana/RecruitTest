@@ -12,6 +12,12 @@ using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using RecruitWeb.Token;
 using Microsoft.AspNetCore.Authorization;
+using JWT;
+using JWT.Algorithms;
+using JWT.Serializers;
+using Microsoft.Extensions.Configuration;
+using RecruitWeb.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace RecruitWeb.Controllers
 {
@@ -19,16 +25,27 @@ namespace RecruitWeb.Controllers
     /// 用户账户控制器, 颁发token, 登录, 注销, 权限授予的功能
     /// </summary>
     [Route("api/[controller]/[action]/{id?}")]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
 
         RecruitDbContext dbContext;
-        IMemoryCache memoryCache;
 
-        public AccountController(RecruitDbContext dbContext, IMemoryCache cache)
+        IMemoryCache MemoryCache;
+
+        static JwtTokenConfig jwtTokenConfig;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <param name="cache"></param>
+        /// <param name="jwtConfig"></param>
+        public AccountController(RecruitDbContext dbContext, IMemoryCache cache, IOptions<JwtTokenConfig> jwtConfig)
         {
             this.dbContext = dbContext;
-            memoryCache = cache;
+            MemoryCache = cache;
+            jwtTokenConfig = jwtConfig.Value;
+            Config.cache = cache;   // 请求到达action方法之前, 初始化缓存配置
         }
 
         [HttpPost]
@@ -48,37 +65,57 @@ namespace RecruitWeb.Controllers
             }
             else
             {
-                var date = DateTime.UtcNow;
-                Claim[] claims = new Claim[]
+                try
                 {
-                new Claim(JwtRegisteredClaimNames.Sub, "test"),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, date.ToString(), ClaimValueTypes.Integer64),
-                };
 
-                JwtSecurityToken jwt = new JwtSecurityToken(
-                issuer: "Asuna",
-                audience: user.phone,
-                claims: claims,
-                expires: DateTime.Now.AddHours(24),
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes("Asuna2yhciUyMHdvbmclMFWfsaZlJTIwLm5ldA==")), SecurityAlgorithms.HmacSha256)
-                );
-                var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
-                var response = new
+
+                    var guid = Guid.NewGuid().ToString();   // 唯一标识
+
+                    var payload = new Dictionary<string, object>()
+                    {
+                        { "jti", guid}
+                    };
+
+                    string secret = jwtTokenConfig.Secret;
+                    IJwtAlgorithm algorithm = new HMACSHA256Algorithm();
+                    IJsonSerializer serializer = new JsonNetSerializer();
+                    IBase64UrlEncoder urlEncoder = new JwtBase64UrlEncoder();
+                    IJwtEncoder encoder = new JwtEncoder(algorithm, serializer, urlEncoder);
+
+                    var jwtToken = encoder.Encode(payload, secret);  // 生成jwtToken
+                    DateTime utcNow = DateTime.UtcNow;
+                    var userClaims = new List<Claim>();
+                    // 可以添加多个role , 但是role type 必须相同
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+
+                    // 将用户token保存到内存缓存
+                    MemoryCacheService.SetChacheValue(guid,
+                        new SignedUser()
+                        {
+                            guid = guid,
+                            Audience = jwtTokenConfig.Audience,
+                            Issuer = jwtTokenConfig.Issuer,
+                            utc_time = utcNow,
+                            user_token = jwtToken,
+                            user_phone = user.phone,
+                            user_claims = userClaims,
+                            Validity = jwtTokenConfig.Validity,
+                            TokenType = jwtTokenConfig.TokenType
+                        });
+
+                    // 将token写入响应流中
+                    var response = new { token = jwtToken, expires_in = jwtTokenConfig.Validity, token_type = jwtTokenConfig.TokenType };
+                    return Json(response);
+                }
+                catch (Exception ex)
                 {
-                    access_token = encodedJwt,
-                    expires_in = 24,    // 24小时
-                    token_type = "Bearer"
-                };
+                    return new ContentResult() { Content = ex.Message, StatusCode = 500 };
+                }
 
-                var userClaims = new List<Claim>() { new Claim("role", user.role) };    // 权限可以有多个, 保存在数据库用户表中
-                memoryCache.SetChacheValue(encodedJwt, new SignedUser() { user_token = encodedJwt, user_phone = user.phone, user_claims = userClaims });   // 将用户token保存到内存缓存
-
-                return Json(response);
             }
         }
 
-        [Authorize("test")]
+        [Token(role = "admin")]
         public IActionResult CheckToken()
         {
             return Content("请求成功");

@@ -106,7 +106,8 @@
             // ...设置请求头的token
             var token = getCookie("token");
             if (token.length > 0) {
-                request.headers.set('Authorization', token);
+                request.headers.set('token', token);
+                request.headers.set('token_type', getCookie("token_type"));
             }
 
             next(function (response) {
@@ -114,6 +115,12 @@
                 // 请求发送后的处理逻辑
                 // ...
                 // 根据请求的状态，response参数会返回给successCallback或errorCallback
+                if (response.status == 401) {
+                    if (response.body == 'tokenInvalid') {
+                        setCookie("token", ''); // 清除token, 重新加载
+                        location.reload();
+                    }
+                }
                 return response
             })
         })
@@ -151,8 +158,9 @@
                         timeout: 3000,
                     }).then(function (response) {
                         if (response.status == 200) {
-                            setCookie("token", response.body.token_type + ' ' + response.body.access_token, response.body.expires_in);
-                            alert(response.body);
+                            setCookie("token", response.body.token, response.body.expires_in);
+                            setCookie("token_type", response.body.token_type, response.body.expires_in);
+                            this.$data.bodyContent = 'init';
                         } else {
                             alert(response);
                         }

@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Caching.Memory;
 using Common;
 using RecruitWeb.Token;
+using RecruitWeb.Configuration;
 
 namespace RecruitWeb
 {
@@ -34,8 +35,12 @@ namespace RecruitWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Config.configuration = Configuration;
             services.AddMemoryCache();  // 内存缓存, 如果系统太大了, 可以考虑拆分到redis, 也就是分布式token
             services.AddMvc();
+            services.AddOptions();
+            // 加载JwtTokenConfig的配置文件
+            services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtTokenConfig"));
             #region 根据配置文件加载不同的数据库
             var DbServerName = Configuration.GetValue<string>("DbServerName");
             switch (DbServerName)
@@ -55,47 +60,6 @@ namespace RecruitWeb
                     services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
             }
-            #endregion
-
-            #region 加载jwt的配置
-            var audienceConfig = Configuration.GetSection("Audience");
-            var symmetricKeyAsBase64 = audienceConfig["Secret"];
-            var keyByteArray = Encoding.ASCII.GetBytes(symmetricKeyAsBase64);
-            var signingKey = new SymmetricSecurityKey(keyByteArray);
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-
-                // The signing key must match!
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = signingKey,
-
-                // Validate the JWT Issuer (iss) claim
-                ValidateIssuer = true,
-                ValidIssuer = audienceConfig["Issuer"],
-
-                // Validate the JWT Audience (aud) claim
-                ValidateAudience = true,
-                ValidAudience = audienceConfig["Audience"],
-
-                // Validate the token expiry
-                ValidateLifetime = true,
-
-                ClockSkew = TimeSpan.Zero
-            };
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(o =>
-            {
-                //不使用https
-                //o.RequireHttpsMetadata = false;
-                o.TokenValidationParameters = tokenValidationParameters;
-            });
-
             #endregion
         }
 
@@ -120,8 +84,6 @@ namespace RecruitWeb
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            app.UseMiddleware<TokenProviderMiddleware>();
 
             #region 自动创建数据库, 并且初始化测试数据, 创建唯一键和索引等
             try
