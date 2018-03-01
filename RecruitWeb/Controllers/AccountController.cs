@@ -88,20 +88,20 @@ namespace RecruitWeb.Controllers
 
                 // 可以添加多个role , 但是role type 必须相同, 如果是正式的产品, 这里需要单独提取一张权限表, 仅做测试阶段使用
                 var userClaims = new List<Claim>();
-                if (user.role.Equals("admin"))
+                if (user.auth_role.Equals("admin"))
                 {
-                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.auth_role));
                     userClaims.Add(new Claim(nameof(TokenAttribute.role), "user"));
                     userClaims.Add(new Claim(nameof(TokenAttribute.role), "company"));
                 }
-                else if (user.role.Equals("company"))
+                else if (user.auth_role.Equals("company"))
                 {
-                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.auth_role));
                     userClaims.Add(new Claim(nameof(TokenAttribute.role), "user"));
                 }
                 else
                 {
-                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.role));
+                    userClaims.Add(new Claim(nameof(TokenAttribute.role), user.auth_role));
                 }
 
                 // 将用户token保存到内存缓存

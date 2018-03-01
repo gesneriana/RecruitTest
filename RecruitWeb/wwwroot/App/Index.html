@@ -28,8 +28,9 @@
 
         <div class="center-block" style="width:1200px;min-height:600px;">
 
+            <!--登录后显示的主题内容-->
             <div v-if="bodyContent=='init'" class="center-block" style="width:600px;">
-                <button type="button" @click="testToken">测试token是否有效</button>
+                显示主要内容
             </div>
 
             <div v-if="bodyContent=='login'" class="center-block" style="width:600px;">
@@ -62,19 +63,39 @@
                 </form>
             </div>
 
+            <!--注册的表单-->
             <div v-if="bodyContent=='SignInUser'" class="center-block" style="width:600px;">
                 <form class="form-horizontal" role="form">
                     <div class="form-group">
                         <label class="col-md-3 control-label">注册类型:</label>
                         <div class="col-md-9">
-                            <select v-model="signUserData.role">
+                            <select v-model="signUserData.auth_role" class="form-control">
                                 <option value="user">个人</option>
                                 <option value="company">公司</option>
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">真实姓名:</label>
+                        <div class="col-md-9">
+                            <input type="text" v-model="signUserData.uname" class="form-control" placeholder="真实姓名,面试时必须本人"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">生日:</label>
+                        <div class="col-md-9">
+                            <input type="date" id="signUserData-birthday" v-model="signUserData.birthday" class="form-control laydate-date-input" placeholder="真实生日,面试必须本人"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">邮箱:</label>
+                        <div class="col-md-9">
+                            <input type="email" v-model="signUserData.email" class="form-control" placeholder="电子邮件地址,必填"/>
+                        </div>
+                    </div>
                 </form>
             </div>
+
         </div>
     </div>
 
@@ -89,8 +110,15 @@
     <script src="../lib/bootstrap/dist/js/bootstrap.js"></script>
     <script src="../js/vue.js"></script>
     <script src="../js/vue-resource.js"></script>
+    <script src="../lib/laydate/laydate.js"></script>
     <script src="../js/site.js"></script>
     <script type="text/javascript">
+        lay('#version').html('-v' + laydate.v);
+
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#signUserData-birthday' //指定元素
+        });
 
         //读Cookie
         function getCookie(objName) {//获取指定名称的cookie的值
@@ -104,7 +132,6 @@
         //设置cookie的值
         function setCookie(cname, cvalue, exHours) {
             var d = new Date();
-            console.log(cname + '/' + cvalue + '/' + exHours)
             d.setTime(d.getTime() + (exHours * 60 * 60 * 1000));
             var expires = "expires=" + d.toGMTString();
             document.cookie = cname + "=" + escape(cvalue) + "; " + expires;
@@ -152,21 +179,22 @@
                     nickname: '',
                     pwd: '',
                     uname: '',
-                    CompanyAddress: '',
-                    CompanyCode: '',
-                    CompanyContact: '',
-                    CompanyName: '',
-                    cardno: '',
+                    company_address: '',
+                    company_code: '',
+                    company_contact: '',
+                    company_name: '',
+                    birthday: '',
                     email: '',
                     nickname: '',
                     phone: '',
-                    role=''
+                    auth_role:'user'
                 },
                 hasToken: false,
                 bodyContent: 'init',
                 uname: '',  // 登录表单的用户名
                 pwd: '' //登录表单的密码
             },
+
 
             // 初始化的函数, 相当于ready
             mounted: function () {

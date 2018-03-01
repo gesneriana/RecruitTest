@@ -16,6 +16,7 @@ namespace Recruit.Models
         /// <summary>
         /// 自定义的主键, 创建的时候有默认值, 不需要手动赋值
         /// </summary>
+        [MaxLength(60)]
         [Key]
         public string uuid { get; set; } = UUID.getUUID();
 
@@ -33,10 +34,10 @@ namespace Recruit.Models
         public string uname { get; set; } = string.Empty;
 
         /// <summary>
-        /// 身份证号码前面14位, 面试者必填
+        /// 生日, 可以确定是不是本人, 面试者必填
         /// </summary>
         [MaxLength(14)]
-        public string cardno { get; set; } = string.Empty;
+        public string birthday { get; set; } = string.Empty;
 
         /// <summary>
         /// 密码, SHA2加密, 不可还原
@@ -55,6 +56,7 @@ namespace Recruit.Models
         /// 邮件, 必填, 唯一索引
         /// </summary>
         [EmailAddress]
+        [MaxLength(50)]
         public string email { get; set; } = string.Empty;
 
 
@@ -62,32 +64,32 @@ namespace Recruit.Models
         /// 组织机构代码, 全国统一社会信用代码, 公司的唯一标识, 因为不是必填的, 所以不能设置索引
         /// </summary>
         [MaxLength(50)]
-        public string CompanyCode { get; set; } = string.Empty;
+        public string company_code { get; set; } = string.Empty;
 
         /// <summary>
         /// 公司名称, 公司用户必填
         /// </summary>
         [MaxLength(50)]
-        public string CompanyName { get; set; } = string.Empty;
+        public string company_name { get; set; } = string.Empty;
 
         /// <summary>
         /// 公司地址, 公司用户必填
         /// </summary>
         [MaxLength(200)]
-        public string CompanyAddress { get; set; } = string.Empty;
+        public string company_address { get; set; } = string.Empty;
 
         /// <summary>
         /// 公司联系方式,非必填
         /// </summary>
         [MaxLength(50)]
-        public string CompanyContact { get; set; } = string.Empty;
+        public string company_contact { get; set; } = string.Empty;
 
         /// <summary>
         /// 权限, admin , user ,company , 
         /// 因为不想看见null, 所以都给了默认值, 这是强迫症, 
         /// </summary>
         [MaxLength(50)]
-        public string role { get; set; } = string.Empty;
+        public string auth_role { get; set; } = string.Empty;
 
         /// <summary>
         /// 添加时间, 

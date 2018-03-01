@@ -38,8 +38,8 @@ namespace Recruit.Data
         /// <returns></returns>
         public async Task InitDatabaseData()
         {
-            dbContext.recruit_user.Add(new recruit_user() { nickname = "asuna", uname = "江郎才尽", cardno = "42112719941208", email = "s694060865@gmail.com", phone = "17666293366", role = "user", pwd = Sha1.getSha1String("angel.") });
-            dbContext.recruit_user.Add(new recruit_user() { nickname = "才众电脑", uname = "才众电脑", email = "s694060865@163.com", phone = "17665271050", role = "company", pwd = Sha1.getSha1String("kotori.") });
+            dbContext.recruit_user.Add(new recruit_user() { nickname = "asuna", uname = "江郎才尽", birthday = "42112719941208", email = "s694060865@gmail.com", phone = "17666293366", auth_role = "user", pwd = Sha1.getSha1String("angel.") });
+            dbContext.recruit_user.Add(new recruit_user() { nickname = "才众电脑", uname = "才众电脑", email = "s694060865@163.com", phone = "17665271050", auth_role = "company", pwd = Sha1.getSha1String("kotori.") });
 
             await dbContext.SaveChangesAsync();
         }
