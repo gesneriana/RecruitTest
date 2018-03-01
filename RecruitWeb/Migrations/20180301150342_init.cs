@@ -12,18 +12,18 @@ namespace RecruitWeb.Migrations
                 name: "recruit_user",
                 columns: table => new
                 {
-                    uuid = table.Column<string>(nullable: false),
-                    CompanyAddress = table.Column<string>(nullable: true),
-                    CompanyCode = table.Column<string>(maxLength: 50, nullable: true),
-                    CompanyContact = table.Column<string>(nullable: true),
-                    CompanyName = table.Column<string>(nullable: true),
+                    uuid = table.Column<string>(maxLength: 60, nullable: false),
                     addtime = table.Column<DateTime>(nullable: false),
-                    cardno = table.Column<string>(maxLength: 14, nullable: true),
-                    email = table.Column<string>(nullable: true),
+                    auth_role = table.Column<string>(maxLength: 50, nullable: true),
+                    birthday = table.Column<string>(maxLength: 14, nullable: true),
+                    company_address = table.Column<string>(maxLength: 200, nullable: true),
+                    company_code = table.Column<string>(maxLength: 50, nullable: true),
+                    company_contact = table.Column<string>(maxLength: 50, nullable: true),
+                    company_name = table.Column<string>(maxLength: 50, nullable: true),
+                    email = table.Column<string>(maxLength: 50, nullable: true),
                     nickname = table.Column<string>(maxLength: 20, nullable: false),
-                    phone = table.Column<string>(nullable: true),
+                    phone = table.Column<string>(maxLength: 20, nullable: true),
                     pwd = table.Column<string>(maxLength: 200, nullable: false),
-                    role = table.Column<string>(nullable: true),
                     uname = table.Column<string>(maxLength: 20, nullable: true)
                 },
                 constraints: table =>

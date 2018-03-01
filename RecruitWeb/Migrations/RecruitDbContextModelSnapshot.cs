@@ -23,35 +23,42 @@ namespace RecruitWeb.Migrations
             modelBuilder.Entity("Recruit.Models.recruit_user", b =>
                 {
                     b.Property<string>("uuid")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("CompanyAddress");
-
-                    b.Property<string>("CompanyCode")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("CompanyContact");
-
-                    b.Property<string>("CompanyName");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(60);
 
                     b.Property<DateTime>("addtime");
 
-                    b.Property<string>("cardno")
+                    b.Property<string>("auth_role")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("birthday")
                         .HasMaxLength(14);
 
-                    b.Property<string>("email");
+                    b.Property<string>("company_address")
+                        .HasMaxLength(200);
+
+                    b.Property<string>("company_code")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("company_contact")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("company_name")
+                        .HasMaxLength(50);
+
+                    b.Property<string>("email")
+                        .HasMaxLength(50);
 
                     b.Property<string>("nickname")
                         .IsRequired()
                         .HasMaxLength(20);
 
-                    b.Property<string>("phone");
+                    b.Property<string>("phone")
+                        .HasMaxLength(20);
 
                     b.Property<string>("pwd")
                         .IsRequired()
                         .HasMaxLength(200);
-
-                    b.Property<string>("role");
 
                     b.Property<string>("uname")
                         .HasMaxLength(20);

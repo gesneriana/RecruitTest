@@ -6,8 +6,8 @@
     <title>.net core基础测试</title>
 
     <link href="../lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+    <!-- 在url后面加参数可以立即刷新客户端缓存 -->
     <link href="../css/site.css" rel="stylesheet" />
-
 </head>
 <body>
     <div id="app">
@@ -76,21 +76,74 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="control-label col-md-3">真实姓名:</label>
+                        <label class="control-label col-md-3">登录名:</label>
                         <div class="col-md-9">
-                            <input type="text" v-model="signUserData.uname" class="form-control" placeholder="真实姓名,面试时必须本人"/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="control-label col-md-3">生日:</label>
-                        <div class="col-md-9">
-                            <input type="date" id="signUserData-birthday" v-model="signUserData.birthday" class="form-control laydate-date-input" placeholder="真实生日,面试必须本人"/>
+                            <input type="text" class="form-control" v-model="signUserData.nickname" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-md-3">邮箱:</label>
                         <div class="col-md-9">
-                            <input type="email" v-model="signUserData.email" class="form-control" placeholder="电子邮件地址,必填"/>
+                            <input type="email" v-model="signUserData.email" class="form-control" placeholder="电子邮件地址,必填" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">手机号:</label>
+                        <div class="col-md-9">
+                            <input type="tel" v-model="signUserData.phone" class="form-control" placeholder="手机号,必填" />
+                        </div>
+                    </div>
+
+                    <!--个人用户注册时显示的表单-->
+                    <template v-if="signUserData.auth_role=='user'">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">真实姓名:</label>
+                            <div class="col-md-9">
+                                <input type="text" v-model="signUserData.uname" class="form-control" placeholder="真实姓名,面试时必须本人" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">生日:</label>
+                            <div class="col-md-9">
+                                <input type="date" id="signUserData-birthday" v-model="signUserData.birthday" class="form-control laydate-date-input" placeholder="真实生日,面试必须本人" />
+                            </div>
+                        </div>
+                    </template>
+
+                    <!--公司用户注册时显示的表单-->
+                    <template v-if="signUserData.auth_role=='company'">
+                        <div class="form-group">
+                            <label class="control-label col-md-3">公司代码:</label>
+                            <div class="col-md-9">
+                                <input type="text" v-model="signUserData.company_code" class="form-control" placeholder="公司唯一的编号" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">公司地址:</label>
+                            <div class="col-md-9">
+                                <input type="text" v-model="signUserData.company_address" class="form-control" placeholder="公司办公的地址" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">公司名称:</label>
+                            <div class="col-md-9">
+                                <input type="text" v-model="signUserData.company_name" class="form-control" placeholder="公司名称" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3">联系方式:</label>
+                            <div class="col-md-9">
+                                <input type="text" v-model="signUserData.company_contact" class="form-control" placeholder="公司电话号码或者邮箱" />
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div class="form-group">
+                        <div class="col-md-3 col-md-offset-3">
+                            <input type="button" @click.stop="registerUser" class="btn btn-primary" value="注册"/>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="button" @click="userLogin" class="btn btn-default" value="登录"/>
                         </div>
                     </div>
                 </form>
@@ -111,144 +164,7 @@
     <script src="../js/vue.js"></script>
     <script src="../js/vue-resource.js"></script>
     <script src="../lib/laydate/laydate.js"></script>
+    <!-- 想要立即刷新客户端缓存可以再url后面加参数 ?ver=xxx -->
     <script src="../js/site.js"></script>
-    <script type="text/javascript">
-        lay('#version').html('-v' + laydate.v);
-
-        //执行一个laydate实例
-        laydate.render({
-            elem: '#signUserData-birthday' //指定元素
-        });
-
-        //读Cookie
-        function getCookie(objName) {//获取指定名称的cookie的值
-            var arrStr = document.cookie.split("; ");
-            for (var i = 0; i < arrStr.length; i++) {
-                var temp = arrStr[i].split("=");
-                if (temp[0] == objName) return unescape(temp[1]);
-            }
-            return "";
-        }
-        //设置cookie的值
-        function setCookie(cname, cvalue, exHours) {
-            var d = new Date();
-            d.setTime(d.getTime() + (exHours * 60 * 60 * 1000));
-            var expires = "expires=" + d.toGMTString();
-            document.cookie = cname + "=" + escape(cvalue) + "; " + expires;
-            console.log(document.cookie);
-        }
-
-        // 使用表单数据传输参数
-        Vue.http.options.emulateJSON = true;
-
-        // Vue请求拦截器, 可以在请求开始前和请求后做一些额外的事情
-        Vue.http.interceptors.push(function (request, next) {
-            // 请求发送前的处理逻辑
-
-            // ...设置请求头的token
-            var token = getCookie("token");
-            if (token.length > 0) {
-                request.headers.set('token', token);
-                request.headers.set('token_type', getCookie("token_type"));
-            }
-
-            next(function (response) {
-                // ...
-                // 请求发送后的处理逻辑
-                // ...
-                // 根据请求的状态，response参数会返回给successCallback或errorCallback
-                if (response.status >= 400) {
-                    if (response.body.ShowMsgBox) {
-                        alert(response.body.ErrorMessage);  // 显示错误信息, 也可以弹出模态框显示
-                    }
-                    if (response.body.ErrorType == 'TokenError') {
-                        setCookie("token", ''); // 清除token, 重新加载
-                        location.reload();
-                    }
-                }
-                return response
-            })
-        });
-
-        // 当前html页面的Vue实例
-        var vm = new Vue({
-            el: '#app',
-            data: {
-                signUserData:
-                {
-                    nickname: '',
-                    pwd: '',
-                    uname: '',
-                    company_address: '',
-                    company_code: '',
-                    company_contact: '',
-                    company_name: '',
-                    birthday: '',
-                    email: '',
-                    nickname: '',
-                    phone: '',
-                    auth_role:'user'
-                },
-                hasToken: false,
-                bodyContent: 'init',
-                uname: '',  // 登录表单的用户名
-                pwd: '' //登录表单的密码
-            },
-
-
-            // 初始化的函数, 相当于ready
-            mounted: function () {
-                if (getCookie("token").length > 0) {
-                    // 有token, 但是可能过期, 隐藏登陆和注册按钮
-                    this.$data.hasToken = true;
-                    this.testToken();   // 验证token是否有效
-                } else {
-                    // 没有token, 显示登录的模板
-                    this.$data.bodyContent = "login";
-                }
-            },
-
-            // vue监听的方法
-            methods: {
-                // 登录api, 获取token
-                getJwtToken: function () {
-                    this.$http({
-                        method: 'post',
-                        url: '/api/account/login',
-                        body: { uname: this.uname, pwd: this.pwd },
-                        timeout: 3000,
-                    }).then(function (response) {
-                        if (response.status == 200) {
-                            this.hasToken = true;
-                            setCookie("token", response.body.token, response.body.expires_in);
-                            setCookie("token_type", response.body.token_type, response.body.expires_in);
-                            this.$data.bodyContent = 'init';
-                        } else {
-                            alert(response);
-                        }
-                    });
-                },
-                // 验证token是否有效的方法
-                testToken: function () {
-                    this.$http({
-                        method: 'post',
-                        url: '/api/account/CheckToken',
-                        timeout: 3000,
-                    }).then(function (response) {
-                        console.info(response.body);
-                    });
-                },
-                // 注销
-                signUp: function () {
-                    setCookie("token", '');
-                    this.bodyContent = 'login';
-                },
-                // 打开注册界面
-                signIn: function () {
-                    this.bodyContent = 'SignInUser';
-                }
-            }
-        });
-    </script>
 </body>
 </html>
