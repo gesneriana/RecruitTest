@@ -36,7 +36,7 @@
             <div v-if="bodyContent=='login'" class="center-block" style="width:600px;">
                 <!-- 登录表单,如果以登录则不会显示 -->
                 <form class="form-horizontal" role="form">
-
+                    
                     <div class="form-group">
                         <label class="col-md-3 control-label">用户名:</label>
                         <div class="col-md-9">
@@ -65,7 +65,7 @@
 
             <!--注册的表单-->
             <div v-if="bodyContent=='SignInUser'" class="center-block" style="width:600px;">
-                <form class="form-horizontal" role="form">
+                <form id="regUserForm" class="form-horizontal" role="form">
                     <div class="form-group">
                         <label class="col-md-3 control-label">注册类型:</label>
                         <div class="col-md-9">
@@ -78,13 +78,25 @@
                     <div class="form-group">
                         <label class="control-label col-md-3">登录名:</label>
                         <div class="col-md-9">
-                            <input type="text" class="form-control" v-model="signUserData.nickname" />
+                            <input type="text" class="form-control" v-model="signUserData.nickname" placeholder="2到20个字符"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">密码:</label>
+                        <div class="col-md-9">
+                            <input type="password" class="form-control" v-model="signUserData.pwd" placeholder="6到20个字符" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label col-md-3">重复密码:</label>
+                        <div class="col-md-9">
+                            <input type="password" class="form-control" v-model="signUserData.repwd" placeholder="6到20个字符" />
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="control-label col-md-3">邮箱:</label>
                         <div class="col-md-9">
-                            <input type="email" v-model="signUserData.email" class="form-control" placeholder="电子邮件地址,必填" />
+                            <input type="email" class="form-control" v-model="signUserData.email" placeholder="电子邮件地址,必填"/>
                         </div>
                     </div>
                     <div class="form-group">

@@ -73,7 +73,8 @@ var vm = new Vue({
             email: '',
             nickname: '',
             phone: '',
-            auth_role: 'user'
+            auth_role: 'user',
+            repwd: ''
         },
         hasToken: false,
         bodyContent: 'init',
@@ -137,8 +138,57 @@ var vm = new Vue({
             this.bodyContent = 'login';
         },
         registerUser: function () {
-            alert("注册");
-            this.bodyContent = 'SignInUser';
+            if (this.signUserData.nickname.length < 2 || this.signUserData.nickname.length > 20) {
+                this.signUserData.nickname = '';
+                return;
+            }
+            this.signUserData.nickname = $.trim(this.signUserData.nickname);
+
+            if (this.signUserData.pwd.length < 6) {
+                this.signUserData.pwd = '';
+                return;
+            }
+            if (this.signUserData.pwd != this.signUserData.repwd) {
+                console.log("密码不正确");
+                this.signUserData.repwd = '';
+                return;
+            }
+
+            var email = this.signUserData.email;
+            if (!email.match(/^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+((\.[a-zA-Z0-9_-]{2,3}){1,2})$/)) {
+                this.signUserData.email = '';
+                return;
+            }
+
+            if (this.signUserData.phone.length != 11) {
+                this.signUserData.phone = '';
+                return;
+            }
+            if (this.signUserData.auth_role == 'user') {
+                if (this.signUserData.uname.length < 2 || this.signUserData.uname.length > 20) {
+                    this.signUserData.uname = '';
+                    return;
+                }
+                this.signUserData.uname = $.trim(this.signUserData.uname);
+                if (this.signUserData.birthday.length == 0) {
+                    return;
+                }
+            } else if (this.signUserData.auth_role == 'company') {
+                if (this.signUserData.company_code.length == 0) {
+                    return;
+                }
+                if (this.signUserData.company_address.length == 0) {
+                    return;
+                }
+                if (this.signUserData.company_name.length == 0) {
+                    return;
+                }
+                if (this.signUserData.company_contact.length == 0) {
+                    return;
+                }
+            }
+            // 开始提交到后台注册.
+            alert("通过验证");
         }
     }
 });
