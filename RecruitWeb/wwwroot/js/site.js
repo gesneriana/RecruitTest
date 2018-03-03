@@ -110,6 +110,10 @@ var vm = new Vue({
                     setCookie("token", response.body.token, response.body.expires_in);
                     setCookie("token_type", response.body.token_type, response.body.expires_in);
                     this.$data.bodyContent = 'init';
+                    if (response.body.auth_role == 'company') {
+                        this.signUserData.auth_role = 'company';
+                        location.href = '/app/admin.html';
+                    }
                 } else {
                     alert(response);
                 }
@@ -122,6 +126,10 @@ var vm = new Vue({
                 url: '/api/account/CheckToken',
                 timeout: 3000,
             }).then(function (response) {
+                if (response.body == 'company') {
+                    this.signUserData.auth_role = 'company';
+                    location.href = '/app/admin.html';
+                }
                 console.info(response.body);
             });
         },
@@ -134,9 +142,11 @@ var vm = new Vue({
         signIn: function () {
             this.bodyContent = 'SignInUser';
         },
+        // 打开登录界面
         userLogin: function () {
             this.bodyContent = 'login';
         },
+        // 注册
         registerUser: function () {
             if (this.signUserData.nickname.length < 2 || this.signUserData.nickname.length > 20) {
                 this.signUserData.nickname = '';
@@ -144,6 +154,7 @@ var vm = new Vue({
             }
             this.signUserData.nickname = $.trim(this.signUserData.nickname);
 
+            this.signUserData.pwd = $.trim(this.signUserData.pwd);
             if (this.signUserData.pwd.length < 6) {
                 this.signUserData.pwd = '';
                 return;
@@ -188,7 +199,19 @@ var vm = new Vue({
                 }
             }
             // 开始提交到后台注册.
-            alert("通过验证");
+            this.$http({
+                method: 'post',
+                url: '/api/account/RegisterUser',
+                body: { user: this.signUserData },
+                timeout: 3000,
+            }).then(function (response) {
+                if (response.status == 200) {
+                    alert("注册成功");
+                    this.$data.bodyContent = 'login';
+                } else {
+                    alert(response);
+                }
+            });
         }
     }
 });

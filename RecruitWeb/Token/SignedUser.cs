@@ -27,10 +27,9 @@ namespace RecruitWeb.Token
         public string user_token { get; set; }
 
         /// <summary>
-        /// 手机号, 对应唯一的一个用户
-        /// 也可以使用主键作为关联的key， 但是uuid主键太长了影响性能
+        /// 用户的主键 id, 对应唯一的一个用户
         /// </summary>
-        public string user_phone { get; set; }
+        public string user_uuid { get; set; }
 
         /// <summary>
         /// 颁发者

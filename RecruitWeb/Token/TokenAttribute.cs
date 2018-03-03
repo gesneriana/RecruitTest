@@ -44,7 +44,7 @@ namespace RecruitWeb.Token
                 err.HttpStatusCode = 401;
                 err.ErrorType = ConstantTypeString.TokenError;
                 err.ErrorMessage = "JwtToken的类型不正确";
-                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                 return;
             }
 
@@ -53,7 +53,7 @@ namespace RecruitWeb.Token
                 err.HttpStatusCode = 401;
                 err.ErrorType = ConstantTypeString.TokenError;
                 err.ErrorMessage = "请求数据中没有包含Token";
-                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace RecruitWeb.Token
                                     err.HttpStatusCode = 403;
                                     err.ErrorType = ConstantTypeString.TokenError;
                                     err.ErrorMessage = "token过期";
-                                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                                     return;
                                 }
 
@@ -113,7 +113,7 @@ namespace RecruitWeb.Token
                                     err.HttpStatusCode = 403;
                                     err.ErrorType = ConstantTypeString.UnAuthorization;
                                     err.ErrorMessage = "你没有所需的权限";
-                                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                                     return;
                                 }
 
@@ -123,7 +123,7 @@ namespace RecruitWeb.Token
                                 err.HttpStatusCode = 401;
                                 err.ErrorType = ConstantTypeString.TokenError;
                                 err.ErrorMessage = "你的token可能已经失效";
-                                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                                 return;
                             }
                         }
@@ -132,7 +132,7 @@ namespace RecruitWeb.Token
                             err.HttpStatusCode = 401;
                             err.ErrorType = ConstantTypeString.TokenError;
                             err.ErrorMessage = "token中不包含jti";
-                            context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                            context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                             return;
                         }
 
@@ -143,7 +143,7 @@ namespace RecruitWeb.Token
                     err.HttpStatusCode = 401;
                     err.ErrorType = ConstantTypeString.TokenError;
                     err.ErrorMessage = "token签名验证失败,捕获到SignatureVerificationException";
-                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                     return;
                 }
                 catch (Exception ex)
@@ -151,7 +151,7 @@ namespace RecruitWeb.Token
                     err.HttpStatusCode = 401;
                     err.ErrorType = ConstantTypeString.TokenError;
                     err.ErrorMessage = ex.Message;
-                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                    context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                     return;
                 }
             }
@@ -160,7 +160,7 @@ namespace RecruitWeb.Token
                 err.HttpStatusCode = 401;
                 err.ErrorType = ConstantTypeString.TokenError;
                 err.ErrorMessage = "你的token类型不正确";
-                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                context.Result = new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
                 return;
             }
             base.OnActionExecuting(context);

@@ -19,6 +19,8 @@ using Microsoft.Extensions.Configuration;
 using RecruitWeb.Configuration;
 using Microsoft.Extensions.Options;
 using RecruitWeb.Models;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace RecruitWeb.Controllers
 {
@@ -56,16 +58,16 @@ namespace RecruitWeb.Controllers
                 err.HttpStatusCode = 401;
                 err.ErrorType = ConstantTypeString.TokenError;
                 err.ErrorMessage = "参数错误";
-                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
 
             var user = dbContext.recruit_user.Where(x => (x.nickname.Equals(uname) || x.email.Equals(uname) || x.phone.Equals(uname)) && x.pwd.Equals(Sha1.getSha1String(pwd))).FirstOrDefault();
             if (user == null)
             {
                 err.HttpStatusCode = 403;
-                err.ErrorType = ConstantTypeString.TokenError;
+                err.ErrorType = ConstantTypeString.NormalError;
                 err.ErrorMessage = "用户或者密码错误";
-                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
 
             try
@@ -113,14 +115,14 @@ namespace RecruitWeb.Controllers
                         Issuer = jwtTokenConfig.Issuer,
                         utc_time = utcNow,
                         user_token = jwtToken,
-                        user_phone = user.phone,
+                        user_uuid = user.uuid,
                         user_claims = userClaims,
                         Validity = jwtTokenConfig.Validity,
                         TokenType = jwtTokenConfig.TokenType
                     });
 
                 // 将token写入响应流中
-                var response = new { token = jwtToken, expires_in = jwtTokenConfig.Validity, token_type = jwtTokenConfig.TokenType };
+                var response = new { token = jwtToken, expires_in = jwtTokenConfig.Validity, token_type = jwtTokenConfig.TokenType, user.auth_role };
                 return Json(response);
             }
             catch (Exception ex)
@@ -128,7 +130,7 @@ namespace RecruitWeb.Controllers
                 err.HttpStatusCode = 500;
                 err.ErrorType = ConstantTypeString.TokenError;
                 err.ErrorMessage = ex.Message;
-                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.ContentType };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
         }
 
@@ -139,7 +141,77 @@ namespace RecruitWeb.Controllers
         [Token(role = "user", showMsgBox = false)]
         public IActionResult CheckToken()
         {
-            return Content("请求成功");
+            var result = "user";
+            if (signedUser.user_claims.Exists(x => x.Value.Equals("company")))
+            {
+                result = "company";
+            }
+            return Content(result);
+        }
+
+        /// <summary>
+        /// 注册用户的方法
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public IActionResult RegisterUser(recruit_user user)
+        {
+            ErrorRequestData err = null;
+            if (user == null || string.IsNullOrWhiteSpace(user.pwd))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = "参数错误" };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+
+            try
+            {
+                user.pwd = Sha1.getSha1String(user.pwd);
+                if ("user".Equals(user.auth_role))
+                {
+                    if (string.IsNullOrWhiteSpace(user.uname) || string.IsNullOrWhiteSpace(user.birthday))
+                    {
+                        err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = "参数错误" };
+                        return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+                    }
+                    dbContext.recruit_user.Add(user);
+                    dbContext.SaveChanges();
+                    return Content("请求成功");
+                }
+                else if ("company".Equals(user.auth_role))
+                {
+                    if (string.IsNullOrWhiteSpace(user.company_address)
+                        || string.IsNullOrWhiteSpace(user.company_code)
+                        || string.IsNullOrWhiteSpace(user.company_contact)
+                        || string.IsNullOrWhiteSpace(user.company_name))
+                    {
+                        err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = "参数错误" };
+                        return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+                    }
+                    dbContext.recruit_user.Add(user);
+                    dbContext.SaveChanges();
+                    return Content("请求成功");
+                }
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+
+            err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = "注册失败" };
+            return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
         }
     }
 }

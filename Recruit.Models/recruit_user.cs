@@ -49,6 +49,7 @@ namespace Recruit.Models
         /// 手机号, 必填, 唯一索引
         /// </summary>
         [Phone]
+        [Required]
         [MaxLength(20)]
         public string phone { get; set; } = string.Empty;
 
@@ -56,6 +57,7 @@ namespace Recruit.Models
         /// 邮件, 必填, 唯一索引
         /// </summary>
         [EmailAddress]
+        [Required]
         [MaxLength(50)]
         public string email { get; set; } = string.Empty;
 

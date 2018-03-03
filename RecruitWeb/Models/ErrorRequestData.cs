@@ -13,6 +13,11 @@ namespace RecruitWeb.Models
     public class ConstantTypeString
     {
         /// <summary>
+        /// 普通的错误
+        /// </summary>
+        public const string NormalError = "NormalError";
+
+        /// <summary>
         /// token不正确
         /// </summary>
         public const string TokenError = "TokenError";
@@ -35,7 +40,12 @@ namespace RecruitWeb.Models
         /// <summary>
         /// http 响应头的类型
         /// </summary>
-        public const string ContentType = "application/json";
+        public const string JsonContentType = "application/json";
+
+        /// <summary>
+        /// html 页面的 ContentType
+        /// </summary>
+        public const string TextHtmlContentType = "text/html";
     }
 
     /// <summary>
@@ -49,19 +59,20 @@ namespace RecruitWeb.Models
         public int HttpStatusCode { get; set; } = 400;
 
         /// <summary>
-        /// 错误类型, 例如 TokenInvalid, Exception,  Unauthorized
+        /// 错误类型,默认为NormalError
+        /// 其他的类型例如 TokenInvalid, Exception,  Unauthorized
         /// </summary>
-        public string ErrorType { get; set; }
+        public string ErrorType { get; set; } = ConstantTypeString.NormalError;
 
         /// <summary>
-        /// 是否显示弹窗口提示错误信息
+        /// 是否显示弹窗口提示错误信息, 默认为true
         /// </summary>
-        public bool ShowMsgBox { get; set; }
+        public bool ShowMsgBox { get; set; } = true;
 
         /// <summary>
         /// 错误信息
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; set; } = string.Empty;
 
         /// <summary>
         /// 描述, 默认为空字符串
