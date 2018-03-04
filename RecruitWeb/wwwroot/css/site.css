@@ -34,3 +34,15 @@
         display: none;
     }
 }
+
+/*垂直居中的容器,display:table*/
+.container-vertical {
+    display: table;
+    height: 100%;
+}
+
+/*垂直居中的单元格,display: table-cell;*/
+.row-vertical {
+    display: table-cell;
+    vertical-align: middle;
+}

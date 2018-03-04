@@ -7,17 +7,100 @@
     <link href="../css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <div style="background-color:#292D32;">
-        <div class="center-block" style="width:1200px;">
-            <ul class="nav nav-tabs">
-                <li><a href="#Job" data-toggle="tab">面试岗位设置</a></li>
-                <li><a href="#quizzes">面试试题设置</a></li>
-            </ul>
+    <div id="app">
+        <div style="background-color:#292D32;">
+            <div class="center-block" style="width:1200px;">
+                <!--导航区-->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
+                    <li role="presentation"><a role="tab" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
+                </ul>
+            </div>
         </div>
+
+        <div id="main_content">
+            <!--面板区-->
+            <div class="center-block tab-content" style="width:1200px;min-height:600px;">
+                <div role="tabpanel" class="tab-pane active" id="Job">
+                    <div class="text-center" style="min-height:60px;line-height:60px;">
+                        <form class="form-inline">
+                            <input type="text" v-model="add_job_name" class="form-control" placeholder="岗位名称" />
+                            <button @click="add_job" type="button" class="btn">添加</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="quizzes">
+                    主体内容quizzes
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
     <script src="../lib/jquery/dist/jquery.js"></script>
     <script src="../lib/bootstrap/dist/js/bootstrap.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/vue.js"></script>
+    <script src="../js/vue-resource.js"></script>
+    <script src="../lib/laydate/laydate.js"></script>
+    <script src="../js/site.js"></script>
+    <script type="text/javascript">
+        var vm = new Vue({
+            el: "#app",
+            data: {
+                add_job_name: '',   // 新增 岗位名称 的绑定变量名
+                signUserData: {
+                    auth_role: ''
+                }
+            },
+            mounted: function () {
+                if (getCookie("token").length > 0) {
+                    // 有token, 但是可能过期, 隐藏登陆和注册按钮
+                    this.$data.hasToken = true;
+                    this.testToken();   // 验证token是否有效
+                    // 加载面试岗位
+                } else {
+                    // 跳转到登录页
+                    location.href = '/app/index.html';
+                }
+            },
+            methods: {
+                // 验证token是否有效的方法
+                testToken: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/account/CheckToken',
+                        timeout: 3000,
+                    }).then(function (response) {
+                        console.info(response.body);
+                        if (response.body == 'user') {
+                            location.href = '/app/index.html';
+                        } else if (response.body == 'company') {
+                            this.signUserData.auth_role = 'company';
+                        }
+                    });
+                },
+                // 新增岗位的方法
+                add_job: function () {
+                    if ($.trim(this.add_job_name).length == 0) {
+                        alert("请输入岗位名称");
+                        return;
+                    }
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/AddJobType',
+                        timeout: 3000,
+                        body: { job_name: this.add_job_name }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        this.add_job_name = '';
+                        // 重新加载最新的岗位
+                        alert(response.body);
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
