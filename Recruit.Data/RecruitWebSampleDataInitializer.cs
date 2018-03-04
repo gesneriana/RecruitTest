@@ -79,6 +79,23 @@ namespace Recruit.Data
                 user_id = "88D5811FB2B0A617-25bdaf19-b3e6-4ade-a239-7ba60466732e",
                 is_enabled = true
             });
+
+            dbContext.exam_data.Add(new exam_data()
+            {
+                id = "88D581EF020FFF5C-a1a0bfbc-e1a1-419b-aef3-5cb8806113c0",
+                anwser_a = ".net core",
+                anwser_b = "mono",
+                anwser_c = ".net standard",
+                anwser_d = ".net framework",
+                exam_content = ".net core, mono , .net standard , .net framework那个才是标准库",
+                exam_cq_anwser = "C",
+                exam_eq_answer = string.Empty,
+                exam_type = "cq",
+                job_id = "88D581866484CFAD-17e7a22a-8121-4ebe-942e-5943226ac0b2",
+                user_id = "88D5811FB2B0A617-25bdaf19-b3e6-4ade-a239-7ba60466732e",
+                addtime = DateTime.Parse("2018-03-05 01:00:37.746661")
+            });
+
             await dbContext.SaveChangesAsync();
         }
     }

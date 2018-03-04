@@ -77,5 +77,10 @@ namespace Recruit.Models
         /// </summary>
         [Required, MaxLength(50)]
         public string anwser_d { get; set; }
+
+        /// <summary>
+        /// 添加时间
+        /// </summary>
+        public DateTime addtime { get; set; } = DateTime.Now;
     }
 }

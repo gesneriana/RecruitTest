@@ -14,7 +14,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
                     <li role="presentation"><a role="tab" @click="set_job_id_index" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
-                    <li role="presentation"><a role="tab" @click="get_exam_data(1)" data-toggle="tab" href="#exam_data_pane">查看测试题</a></li>
+                    <li role="presentation"><a role="tab" @click="get_exam_data(1)" data-toggle="tab" href="#exam_data_pane">查看面试题</a></li>
                     <li role="presentation"><a href="" @click="signUp" class="btn btn-primary">注销</a></li>
                 </ul>
             </div>
@@ -158,11 +158,52 @@
 
                 <div role="tabpanel" class="tab-pane" id="exam_data_pane">
                     <div>
-                        <div class="center-block container-fluid" style="width:500px;padding-top:30px;">
+                        <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
                             <select class="form-control" v-model="show_exam_data.job_id">
                                 <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
                             </select>
                         </div>
+                    </div>
+                    <div>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td>试题类型</td>
+                                <td>试题内容</td>
+                                <td>试题答案</td>
+                                <td>选项内容</td>
+                                <td>操作</td>
+                            </tr>
+                            <tr v-for="(item,index) in show_exam_data.list">
+                                <td>
+                                    <template v-if="item.exam_type=='cq'">
+                                        选择题
+                                    </template>
+                                    <template v-if="item.exam_type=='eq'">
+                                        笔试题
+                                    </template>
+                                </td>
+                                <td>{{item.exam_content}}</td>
+                                <td>
+                                    <template v-if="item.exam_type=='cq'">
+                                        {{item.exam_cq_anwser}}
+                                    </template>
+                                    <template v-if="item.exam_type=='eq'">
+                                        {{item.exam_eq_answer}}
+                                    </template>
+                                </td>
+                                <td>
+                                    <template v-if="item.exam_type=='cq'">
+                                        A.{{item.anwser_a}}
+                                        B.{{item.anwser_b}}
+                                        C.{{item.anwser_b}}
+                                        D.{{item.anwser_d}}
+                                    </template>
+                                </td>
+                                <td><button class="btn btn-primary" type="button">禁用</button></td>
+                            </tr>
+                        </table>
+                        <!-- 分页按钮 -->
+                        <div v-html="this.show_exam_data.pages"></div>
                     </div>
                 </div>
             </div>

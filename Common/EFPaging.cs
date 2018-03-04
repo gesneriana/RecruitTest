@@ -259,7 +259,7 @@ namespace Common
             #region 上一页
             if (page < 2)
             {
-                sb.Append("<span class='disabled'>上一页</span>");
+                sb.Append("<span class='disabled btn btn-sm'>上一页</span>");
             }
             else
             {
@@ -272,7 +272,7 @@ namespace Common
                 {
                     s += "?page=" + temp;
                 }
-                sb.AppendFormat("<a href='javascript:;' onclick='getPageInfo(\"{0}\")'>上一页</a>", url + s);
+                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>上一页</a>", url + s);
             }
             #endregion
 
@@ -283,7 +283,7 @@ namespace Common
                 {
                     if (p == page)
                     {
-                        sb.AppendFormat("<span class='current'>{0}</span>", p);
+                        sb.AppendFormat("<span class='current btn btn-sm'>{0}</span>", p);
                     }
                     else
                     {
@@ -296,7 +296,7 @@ namespace Common
                         {
                             s += "?page=" + p;
                         }
-                        sb.AppendFormat("<a href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p);
+                        sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p);
                     }
                 }
             }
@@ -313,7 +313,7 @@ namespace Common
                     {
                         s += "?page=" + p1;
                     }
-                    sb.AppendFormat("<a href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p1);
+                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p1);
                 }
                 sb.AppendFormat("<span class='current'>{0}</span>", page);
                 for (int p2 = page + 1; p2 < page + (btnCount / 2) && p2 <= totalPage; p2++)
@@ -327,7 +327,7 @@ namespace Common
                     {
                         s += "?page=" + p2;
                     }
-                    sb.AppendFormat("<a href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p2);
+                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p2);
                 }
             }
             #endregion
@@ -349,7 +349,7 @@ namespace Common
                 {
                     temp += "?page=" + tpage1;
                 }
-                sb.AppendFormat("<a href='javascript:;' onclick='getPageInfo(\"{0}\")'>下一页</a>", url + temp);
+                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>下一页</a>", url + temp);
             }
             #endregion
             sb.Append("</div>");

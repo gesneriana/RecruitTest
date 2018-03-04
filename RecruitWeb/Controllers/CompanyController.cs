@@ -253,7 +253,7 @@ namespace RecruitWeb.Controllers
             try
             {
                 var p = new EFPaging<exam_data>();
-                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid));
+                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.exam_type).OrderBy(x => x.addtime);
                 var list = p.getPageList(q, "/api/company/get_exam_data", page, 20);
                 var pages = p.pageAjaxHref;
 
