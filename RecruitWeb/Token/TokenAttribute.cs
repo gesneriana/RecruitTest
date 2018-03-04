@@ -23,7 +23,7 @@ namespace RecruitWeb.Token
     {
 
         /// <summary>
-        /// 是否显示弹窗口提示错误信息, 默认显示
+        /// 是否显示弹窗口提示错误信息, 默认为 true 显示
         /// </summary>
         public bool showMsgBox { get; set; } = true;
 

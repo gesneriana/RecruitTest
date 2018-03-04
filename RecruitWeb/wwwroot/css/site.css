@@ -46,3 +46,8 @@
     display: table-cell;
     vertical-align: middle;
 }
+
+/*解决vue.js渲染时页面闪烁的问题*/
+[v-cloak] {
+    display: none
+}

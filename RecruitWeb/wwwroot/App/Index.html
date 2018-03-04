@@ -10,7 +10,7 @@
     <link href="../css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="container-fluid">
             <div class="row center-block" style="width:1200px;min-height:50px;line-height:50px;">
 
@@ -47,7 +47,7 @@
                     <div class="form-group">
                         <label class="col-md-3 control-label">密码:</label>
                         <div class="col-md-9">
-                            <input type="password" class="form-control" id="pwd" v-model="pwd" placeholder="" />
+                            <input @keyup.enter="getJwtToken" type="password" class="form-control" id="pwd" v-model="pwd" placeholder="" />
                         </div>
                     </div>
 

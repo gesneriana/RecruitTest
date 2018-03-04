@@ -7,13 +7,14 @@
     <link href="../css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="app">
+    <div id="app" v-cloak>
         <div style="background-color:#292D32;">
             <div class="center-block" style="width:1200px;">
                 <!--导航区-->
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
                     <li role="presentation"><a role="tab" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
+                    <li role="presentation"><a href="" @click="signUp" class="btn btn-primary">注销</a></li>
                 </ul>
             </div>
         </div>
@@ -22,11 +23,50 @@
             <!--面板区-->
             <div class="center-block tab-content" style="width:1200px;min-height:600px;">
                 <div role="tabpanel" class="tab-pane active" id="Job">
+                    <!--添加-->
                     <div class="text-center" style="min-height:60px;line-height:60px;">
                         <form class="form-inline">
                             <input type="text" v-model="add_job_name" class="form-control" placeholder="岗位名称" />
                             <button @click="add_job" type="button" class="btn">添加</button>
                         </form>
+                    </div>
+
+                    <!--显示岗位列表-->
+                    <div>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td>岗位名称</td>
+                                <td>状态</td>
+                                <td>添加时间</td>
+                                <td>改变状态</td>
+                                <td>删除岗位</td>
+                            </tr>
+                            <tr v-for="(item,index) in job_name_list">
+                                <td>{{item.job_name}}</td>
+                                <td>
+                                    <template v-if="item.is_enabled">
+                                        正常
+                                    </template>
+                                    <template v-if="item.is_enabled==false">
+                                        禁用
+                                    </template>
+                                </td>
+                                <td>{{item.addtime | format_date}}</td>
+                                <td>
+                                    <button @click="change_job_state(index)" class="btn btn-primary" type="button">
+                                        <template v-if="item.is_enabled">
+                                            禁用
+                                        </template>
+                                        <template v-if="item.is_enabled==false">
+                                            恢复
+                                        </template>
+                                    </button>
+                                </td>
+                                <td>
+                                    <button @click="delate_job_type(index)" class="btn btn-primary" type="button">删除</button>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
 
@@ -50,9 +90,12 @@
             el: "#app",
             data: {
                 add_job_name: '',   // 新增 岗位名称 的绑定变量名
+                // 登录的用户数据
                 signUserData: {
                     auth_role: ''
-                }
+                },
+                // 岗位列表 json 数据, 初始化的时候加载
+                job_name_list: {}
             },
             mounted: function () {
                 if (getCookie("token").length > 0) {
@@ -60,6 +103,7 @@
                     this.$data.hasToken = true;
                     this.testToken();   // 验证token是否有效
                     // 加载面试岗位
+                    this.get_job_names();
                 } else {
                     // 跳转到登录页
                     location.href = '/app/index.html';
@@ -81,6 +125,11 @@
                         }
                     });
                 },
+                // 注销
+                signUp: function () {
+                    setCookie("token", '');
+                    location.href = "/app/index.html"
+                },
                 // 新增岗位的方法
                 add_job: function () {
                     if ($.trim(this.add_job_name).length == 0) {
@@ -93,10 +142,53 @@
                         timeout: 3000,
                         body: { job_name: this.add_job_name }
                     }).then(function (response) {
-                        console.info(response.body);
                         this.add_job_name = '';
                         // 重新加载最新的岗位
-                        alert(response.body);
+                        console.info(response.body);
+                        this.job_name_list = response.body;
+                    });
+                },
+                // 添加或者删除之后获取最新的 岗位列表
+                get_job_names: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/get_job_names',
+                        timeout: 3000,
+                    }).then(function (response) {
+                        console.info(response.body);
+                        this.job_name_list = response.body;
+                        // 重新加载最新的岗位
+                    });
+                },
+                // 修改岗位的状态
+                change_job_state: function (index) {
+                    var state = !this.job_name_list[index].is_enabled;
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/change_job_state/' + this.job_name_list[index].uuid,
+                        timeout: 3000,
+                        body: { state: state }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        // 修改岗位的状态
+                        this.job_name_list[index].is_enabled = state;
+                    });
+                },
+                // 删除岗位名称
+                delate_job_type: function (index) {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/delate_job_type/' + this.job_name_list[index].uuid,
+                        timeout: 3000
+                    }).then(function (response) {
+                        console.info(response.body);
+                        // 修改岗位的状态
+                        if (response.body == 'ok') {
+                            // 从指定的索引位置删除 1个 元素,v-for 重新渲染
+                            this.job_name_list.splice(index, 1);
+                        } else {
+                            alert(response.body);
+                        }
                     });
                 }
             }

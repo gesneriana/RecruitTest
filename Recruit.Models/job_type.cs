@@ -15,6 +15,7 @@ namespace Recruit.Models
         /// 主键, 有默认值
         /// </summary>
         [Key]
+        [MaxLength(60)]
         public string uuid { get; set; }
 
         /// <summary>
@@ -26,7 +27,14 @@ namespace Recruit.Models
         /// <summary>
         /// 用户id, 用户的主键
         /// </summary>
+        [Required]
+        [MaxLength(60)]
         public string user_id { get; set; }
+
+        /// <summary>
+        /// 是否可用, 默认为true
+        /// </summary>
+        public bool is_enabled{get;set;}=true;
 
         /// <summary>
         /// 添加时间
