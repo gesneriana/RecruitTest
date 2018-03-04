@@ -31,5 +31,10 @@ namespace Recruit.Models
         /// 岗位类型, 不同的类型对应不同的实体
         /// </summary>
         public DbSet<job_type> job_type { get; set; }
+
+        /// <summary>
+        /// 试题数据, 以及参考答案
+        /// </summary>
+        public DbSet<exam_data> exam_data { get; set; }
     }
 }

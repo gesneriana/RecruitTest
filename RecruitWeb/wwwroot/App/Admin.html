@@ -13,7 +13,8 @@
                 <!--导航区-->
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
-                    <li role="presentation"><a role="tab" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
+                    <li role="presentation"><a role="tab" @click="set_job_id_index" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
+                    <li role="presentation"><a role="tab" @click="get_exam_data(1)" data-toggle="tab" href="#exam_data_pane">查看测试题</a></li>
                     <li role="presentation"><a href="" @click="signUp" class="btn btn-primary">注销</a></li>
                 </ul>
             </div>
@@ -22,10 +23,11 @@
         <div id="main_content">
             <!--面板区-->
             <div class="center-block tab-content" style="width:1200px;min-height:600px;">
+
                 <div role="tabpanel" class="tab-pane active" id="Job">
-                    <!--添加-->
+                    <!--添加岗位-->
                     <div class="text-center" style="min-height:60px;line-height:60px;">
-                        <form class="form-inline">
+                        <form role="form" class="form-inline">
                             <input type="text" v-model="add_job_name" class="form-control" placeholder="岗位名称" />
                             <button @click="add_job" type="button" class="btn">添加</button>
                         </form>
@@ -63,7 +65,7 @@
                                     </button>
                                 </td>
                                 <td>
-                                    <button @click="delate_job_type(index)" class="btn btn-primary" type="button">删除</button>
+                                    <button @click="delete_job_type(index)" class="btn btn-primary" type="button">删除</button>
                                 </td>
                             </tr>
                         </table>
@@ -71,11 +73,100 @@
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="quizzes">
-                    主体内容quizzes
+                    <!--新增试题的表单-->
+                    <div class="text-center container-fluid" style="width:500px;padding-top:30px;">
+                        <form role="form" class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">岗位名称:</label>
+                                <div class="col-md-9">
+                                    <select class="form-control" v-model="exam_data.job_id">
+                                        <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">试题类型</label>
+                                <div class="col-md-9">
+                                    <select class="form-control" v-model="exam_data.exam_type">
+                                        <option value="cq">选择题</option>
+                                        <option value="eq">笔试题</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-3 control-label">问题内容</label>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" rows="5" v-model="exam_data.exam_content" placeholder="请输入问题内容"></textarea>
+                                </div>
+                            </div>
+
+                            <template v-if="this.exam_data.exam_type=='eq'">
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">参考答案</label>
+                                    <div class="col-md-9">
+                                        <textarea class="form-control" rows="5" v-model="exam_data.exam_answer" placeholder="请输入参考答案"></textarea>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <template v-if="this.exam_data.exam_type=='cq'">
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">答案</label>
+                                    <div class="col-md-9">
+                                        <select class="form-control" v-model="exam_data.exam_cq_anwser">
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="D">D</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">选项A</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" v-model="exam_data.anwser_a" placeholder="请输入选项A的内容" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">选项B</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" v-model="exam_data.anwser_b" placeholder="请输入选项B的内容" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">选项C</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" v-model="exam_data.anwser_c" placeholder="请输入选项C的内容" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label">选项D</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" v-model="exam_data.anwser_d" placeholder="请输入选项D的内容" />
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div class="form-group">
+                                <div class="col-md-2 col-md-offset-3">
+                                    <button @click="add_exam_data" class="btn btn-primary" type="button">添加</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div role="tabpanel" class="tab-pane" id="exam_data_pane">
+                    <div>
+                        <div class="center-block container-fluid" style="width:500px;padding-top:30px;">
+                            <select class="form-control" v-model="show_exam_data.job_id">
+                                <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
 
     </div>
 
@@ -95,7 +186,27 @@
                     auth_role: ''
                 },
                 // 岗位列表 json 数据, 初始化的时候加载
-                job_name_list: {}
+                job_name_list: {},
+                // 试题json数据列表
+                exam_list: {},
+                // 新增试题的表单绑定数据
+                exam_data: {
+                    job_id: '',         // 岗位的id, 不同的岗位对应不同的问题
+                    exam_type: 'cq',    // 问题类型
+                    exam_content: '',   // 问题的内容
+                    exam_cq_anwser: 'A',    // 选择题参考答案
+                    exam_eq_answer: '', // 笔试题参考答案
+                    anwser_a: '',
+                    anwser_b: '',
+                    anwser_c: '',
+                    anwser_d: ''
+                },
+                // 查看试题数据
+                show_exam_data: {
+                    job_id: '', // 选中的岗位名称, 工具不同的名称加载不同的数据
+                    list: {},   // 翻页数据
+                    pages: ''   // 翻页按钮
+                }
             },
             mounted: function () {
                 if (getCookie("token").length > 0) {
@@ -148,7 +259,7 @@
                         this.job_name_list = response.body;
                     });
                 },
-                // 添加或者删除之后获取最新的 岗位列表
+                // 首次加载以及 添加或者删除之后获取最新的 岗位列表
                 get_job_names: function () {
                     this.$http({
                         method: 'post',
@@ -175,10 +286,10 @@
                     });
                 },
                 // 删除岗位名称
-                delate_job_type: function (index) {
+                delete_job_type: function (index) {
                     this.$http({
                         method: 'post',
-                        url: '/api/Company/delate_job_type/' + this.job_name_list[index].uuid,
+                        url: '/api/Company/delete_job_type/' + this.job_name_list[index].uuid,
                         timeout: 3000
                     }).then(function (response) {
                         console.info(response.body);
@@ -190,6 +301,41 @@
                             alert(response.body);
                         }
                     });
+                },
+                // 设置下拉框选中默认值
+                set_job_id_index: function () {
+                    if (this.exam_data.job_id.length == 0 && this.job_name_list.length > 0) {
+                        this.exam_data.job_id = this.job_name_list[0].uuid;
+                    }
+                },
+                // 添加测试题
+                add_exam_data: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/add_exam_data',
+                        timeout: 3000,
+                        body: { model: this.exam_data }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        alert(response.body);
+                    });
+                },
+                // 获取测试题数据, 并且初始化下拉框的内容
+                get_exam_data: function (page) {
+                    if (this.show_exam_data.job_id.length == 0 && this.job_name_list.length > 0) {
+                        this.show_exam_data.job_id = this.job_name_list[0].uuid;
+
+                        this.$http({
+                            method: 'post',
+                            url: '/api/Company/get_exam_data',
+                            timeout: 3000,
+                            body: { job_id: this.show_exam_data.job_id }
+                        }).then(function (response) {
+                            console.info(response.body);
+                            this.show_exam_data.list = response.body.list;
+                            this.show_exam_data.pages = response.body.pages;
+                        });
+                    }
                 }
             }
         });

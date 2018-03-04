@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Recruit.Models;
 using System.Threading.Tasks;
+using System;
 
 namespace Recruit.Data
 {
@@ -38,9 +39,46 @@ namespace Recruit.Data
         /// <returns></returns>
         public async Task InitDatabaseData()
         {
-            dbContext.recruit_user.Add(new recruit_user() { nickname = "asuna", uname = "江郎才尽", birthday = "42112719941208", email = "s694060865@gmail.com", phone = "17666293366", auth_role = "user", pwd = Sha1.getSha1String("angel.") });
-            dbContext.recruit_user.Add(new recruit_user() { nickname = "才众电脑", uname = "才众电脑", email = "s694060865@163.com", phone = "17665271050", auth_role = "company", pwd = Sha1.getSha1String("kotori.") });
+            dbContext.recruit_user.Add(new recruit_user()
+            {
+                uuid = "88D5811FB2B0A610-8eb9d0eb-45ad-4b6c-93eb-e8ca2c6581d9",
+                nickname = "asuna",
+                uname = "江郎才尽",
+                birthday = "42112719941208",
+                email = "s694060865@gmail.com",
+                phone = "17666293366",
+                auth_role = "user",
+                pwd = Sha1.getSha1String("angel.")
+            });
 
+            dbContext.recruit_user.Add(new recruit_user()
+            {
+                uuid = "88D5811FB2B0A617-25bdaf19-b3e6-4ade-a239-7ba60466732e",
+                nickname = "才众电脑",
+                uname = "才众电脑",
+                email = "s694060865@163.com",
+                phone = "17665271050",
+                auth_role = "company",
+                pwd = Sha1.getSha1String("kotori.")
+            });
+
+
+            dbContext.job_type.Add(new job_type()
+            {
+                uuid = "88D581866484CFAD-17e7a22a-8121-4ebe-942e-5943226ac0b2",
+                addtime = DateTime.Parse("2018-03-04 12:14:15.481948"),
+                job_name = ".net core工程师",
+                user_id = "88D5811FB2B0A617-25bdaf19-b3e6-4ade-a239-7ba60466732e",
+                is_enabled = true
+            });
+            dbContext.job_type.Add(new job_type()
+            {
+                uuid = "88D581B754874D9C-b4ca7587-aa39-437c-a68e-31ae318177ae",
+                addtime = DateTime.Parse("2018-03-04 18:04:33.994484"),
+                job_name = "前端工程师",
+                user_id = "88D5811FB2B0A617-25bdaf19-b3e6-4ade-a239-7ba60466732e",
+                is_enabled = true
+            });
             await dbContext.SaveChangesAsync();
         }
     }

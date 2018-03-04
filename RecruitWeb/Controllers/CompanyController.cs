@@ -129,7 +129,7 @@ namespace RecruitWeb.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public IActionResult delate_job_type(string id)
+        public IActionResult delete_job_type(string id)
         {
             ErrorRequestData err = null;
             if (string.IsNullOrWhiteSpace(id))
@@ -167,6 +167,116 @@ namespace RecruitWeb.Controllers
                 return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
             return Content("删除失败");
+        }
+
+        /// <summary>
+        /// 添加试题数据
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult add_exam_data(exam_data model)
+        {
+            ErrorRequestData err = null;
+            if (model == null)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(model) + "参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            if ("cq".Equals(model.exam_type))
+            {
+                if (string.IsNullOrWhiteSpace(model.exam_content)
+                    || string.IsNullOrWhiteSpace(model.exam_cq_anwser)
+                    || string.IsNullOrWhiteSpace(model.anwser_a)
+                    || string.IsNullOrWhiteSpace(model.anwser_b)
+                    || string.IsNullOrWhiteSpace(model.anwser_c)
+                    || string.IsNullOrWhiteSpace(model.anwser_d))
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(model) + "参数错误" };
+                    return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+                }
+                model.exam_eq_answer = string.Empty;
+            }
+            else if ("eq".Equals(model.exam_type))
+            {
+                if (string.IsNullOrWhiteSpace(model.exam_content) || string.IsNullOrWhiteSpace(model.exam_eq_answer))
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(model) + "参数错误" };
+                    return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+                }
+                model.exam_cq_anwser = string.Empty;
+            }
+            try
+            {
+                model.user_id = signedUser.user_uuid;
+                dbContext.exam_data.Add(model);
+                dbContext.SaveChanges();
+                return Content("添加成功");
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+
+        }
+
+        /// <summary>
+        /// 分页显示测试题
+        /// </summary>
+        /// <param name="job_id"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public IActionResult get_exam_data(string job_id, int page = 1)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(job_id) || page < 1)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(job_id) + "或者" + nameof(page) + "参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var p = new EFPaging<exam_data>();
+                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid));
+                var list = p.getPageList(q, "/api/company/get_exam_data", page, 20);
+                var pages = p.pageAjaxHref;
+
+                return Json(new { list, pages });
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+
         }
     }
 }
