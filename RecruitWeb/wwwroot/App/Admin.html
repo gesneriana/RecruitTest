@@ -14,7 +14,7 @@
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
                     <li role="presentation"><a role="tab" @click="set_job_id_index" data-toggle="tab" href="#quizzes">面试试题设置</a></li>
-                    <li role="presentation"><a role="tab" @click="get_exam_data(1)" data-toggle="tab" href="#exam_data_pane">查看面试题</a></li>
+                    <li role="presentation"><a role="tab" @click="get_exam_data()" data-toggle="tab" href="#exam_data_pane">查看面试题</a></li>
                     <li role="presentation"><a href="" @click="signUp" class="btn btn-primary">注销</a></li>
                 </ul>
             </div>
@@ -104,7 +104,7 @@
                                 <div class="form-group">
                                     <label class="col-md-3 control-label">参考答案</label>
                                     <div class="col-md-9">
-                                        <textarea class="form-control" rows="5" v-model="exam_data.exam_answer" placeholder="请输入参考答案"></textarea>
+                                        <textarea class="form-control" rows="5" v-model="exam_data.exam_eq_answer" placeholder="请输入参考答案"></textarea>
                                     </div>
                                 </div>
                             </template>
@@ -159,11 +159,12 @@
                 <div role="tabpanel" class="tab-pane" id="exam_data_pane">
                     <div>
                         <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
-                            <select class="form-control" v-model="show_exam_data.job_id">
+                            <select @change="change_show_exam_data" class="form-control" v-model="show_exam_data.job_id">
                                 <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
                             </select>
                         </div>
                     </div>
+
                     <div>
                         <table class="table table-bordered table-striped">
                             <tr>
@@ -199,11 +200,20 @@
                                         D.{{item.anwser_d}}
                                     </template>
                                 </td>
-                                <td><button class="btn btn-primary" type="button">禁用</button></td>
+                                <td>
+                                    <button @click="disable_exam(index)" class="btn btn-primary" type="button">
+                                        <template v-if="item.is_enabled==true">
+                                            禁用
+                                        </template>
+                                        <template v-if="item.is_enabled==false">
+                                            恢复
+                                        </template>
+                                    </button>
+                                </td>
                             </tr>
                         </table>
                         <!-- 分页按钮 -->
-                        <div v-html="this.show_exam_data.pages"></div>
+                        <div v-on:click="getPageInfoProxy($event)" v-html="this.show_exam_data.pages"></div>
                     </div>
                 </div>
             </div>
@@ -244,7 +254,7 @@
                 },
                 // 查看试题数据
                 show_exam_data: {
-                    job_id: '', // 选中的岗位名称, 工具不同的名称加载不同的数据
+                    job_id: '', // 选中的岗位名称, 根据不同的名称加载不同的数据
                     list: {},   // 翻页数据
                     pages: ''   // 翻页按钮
                 }
@@ -358,13 +368,14 @@
                         body: { model: this.exam_data }
                     }).then(function (response) {
                         console.info(response.body);
+                        this.show_exam_data = {};
                         alert(response.body);
                     });
                 },
-                // 获取测试题数据, 并且初始化下拉框的内容
-                get_exam_data: function (page) {
+                // 初始化测试题数据, 并且初始化下拉框的内容
+                get_exam_data: function () {
                     if (this.show_exam_data.job_id.length == 0 && this.job_name_list.length > 0) {
-                        this.show_exam_data.job_id = this.job_name_list[0].uuid;
+                        this.show_exam_data.job_id = this.job_name_list[0].uuid;    // 设置默认选中
 
                         this.$http({
                             method: 'post',
@@ -377,6 +388,54 @@
                             this.show_exam_data.pages = response.body.pages;
                         });
                     }
+                },
+                // 下拉框改变的时候显示不同的岗位 试题数据
+                change_show_exam_data: function () {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Company/get_exam_data',
+                        timeout: 3000,
+                        body: { job_id: this.show_exam_data.job_id }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        this.show_exam_data.list = response.body.list;
+                        this.show_exam_data.pages = response.body.pages;
+                    });
+                },
+                // 翻页
+                getPageInfo: function (url) {
+                    this.$http({
+                        method: 'post',
+                        url: url,
+                        timeout: 3000
+                    }).then(function (response) {
+                        console.info(response.body);
+                        this.show_exam_data.list = response.body.list;
+                        this.show_exam_data.pages = response.body.pages;
+                    });
+                },
+                // 翻页的事件代理
+                getPageInfoProxy: function (event) {
+                    if (event.target.nodeName.toLowerCase() == 'a') {
+                        console.log($(event.target).attr("data-url"));
+                        this.getPageInfo($(event.target).attr("data-url"));
+                    }
+                },
+                // 禁用指定的试题
+                disable_exam: function (index) {
+                    console.log(this.show_exam_data.list[index].id);
+                    console.log(this.show_exam_data.list[index].is_enabled);
+                    var state = !this.show_exam_data.list[index].is_enabled;
+                    this.$http({
+                        method: 'post',
+                        url: "/api/company/disable_exam/" + this.show_exam_data.list[index].id,
+                        timeout: 3000,
+                        body: { state: state }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        this.show_exam_data.list[index].is_enabled = state;
+                    });
+
                 }
             }
         });

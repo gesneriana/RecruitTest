@@ -72,8 +72,30 @@ namespace RecruitWeb.Controllers
         /// <returns></returns>
         public IActionResult get_job_names()
         {
-            var list = dbContext.job_type.Where(x => x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.is_enabled).ToList();
-            return Json(list);
+            ErrorRequestData err = null;
+            try
+            {
+                var list = dbContext.job_type.Where(x => x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.is_enabled).ToList();
+                return Json(list);
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+
         }
 
 
@@ -206,6 +228,10 @@ namespace RecruitWeb.Controllers
                     return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
                 }
                 model.exam_cq_anwser = string.Empty;
+                model.anwser_a = string.Empty;
+                model.anwser_b = string.Empty;
+                model.anwser_c = string.Empty;
+                model.anwser_d = string.Empty;
             }
             try
             {
@@ -240,7 +266,6 @@ namespace RecruitWeb.Controllers
         /// <param name="job_id"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [HttpPost]
         public IActionResult get_exam_data(string job_id, int page = 1)
         {
             ErrorRequestData err = null;
@@ -253,8 +278,8 @@ namespace RecruitWeb.Controllers
             try
             {
                 var p = new EFPaging<exam_data>();
-                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.exam_type).OrderBy(x => x.addtime);
-                var list = p.getPageList(q, "/api/company/get_exam_data", page, 20);
+                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.exam_type);
+                var list = p.getPageList(q, "/api/company/get_exam_data?job_id=" + job_id, page);
                 var pages = p.pageAjaxHref;
 
                 return Json(new { list, pages });
@@ -277,6 +302,49 @@ namespace RecruitWeb.Controllers
                 return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
 
+        }
+
+        /// <summary>
+        /// 禁用一条试题记录
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public IActionResult disable_exam(string id, bool state = true)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var exam = dbContext.exam_data.Where(x => x.id.Equals(id) && x.user_id.Equals(signedUser.user_uuid)).FirstOrDefault();
+                if (exam != null)
+                {
+                    exam.is_enabled = state;
+                }
+                dbContext.SaveChanges();
+                return Content("修改成功");
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
         }
     }
 }

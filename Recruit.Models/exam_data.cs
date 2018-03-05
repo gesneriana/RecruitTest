@@ -82,5 +82,10 @@ namespace Recruit.Models
         /// 添加时间
         /// </summary>
         public DateTime addtime { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// 默认 可用
+        /// </summary>
+        public bool is_enabled { get; set; } = true;
     }
 }

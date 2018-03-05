@@ -48,12 +48,14 @@ namespace Common
         /// 而且不需要立即显示出来, 建议使用重载方法, 加上Select()选择列
         /// </summary>
         /// <param name="q">查询条件</param>
-        /// /// <param name="url">需要分页的请求路径,可以带上参数</param>
+        /// <param name="url">需要分页的请求路径,可以带上参数</param>
         /// <param name="page">页码, >= 1</param>
+        /// <param name="isVue"> 是否是 vue 的方法  </param>
+        /// <param name="func_name"> 加载数据的ajax方法名 </param>
         /// <param name="count">每页显示的数量,5-20之间</param>
-        /// /// <param name="btnCount">显示的可以点击的按钮的个数 3-10之间</param>
+        /// <param name="btnCount">显示的可以点击的按钮的个数 3-10之间</param>
         /// <returns>List泛型集合</returns>
-        public List<T> getPageList(IQueryable<T> q, string url, int page = 1, int count = 10, int btnCount = 5)
+        public List<T> getPageList(IQueryable<T> q, string url, int page = 1, int count = 10, bool isVue = true, string func_name = "getPageInfo", int btnCount = 5)
         {
             #region 计算总记录数以及页码等逻辑
             if (count < 5) { count = 5; } else if (count > 20) { count = 20; }
@@ -87,11 +89,11 @@ namespace Common
             if (page > 1)
             {
                 pageUrl = getPageHref(totalCount, url, page, count, btnCount);
-                pageAjaxHref = getPageAjax(totalCount, url, page, count, btnCount);
+                pageAjaxHref = getPageAjax(totalCount, url, page, isVue, func_name, count, btnCount);
                 return q.Skip((page - 1) * count).Take(count).ToList();    // 跳过前面的数据,获取指定页码的count条数据
             }
             pageUrl = getPageHref(totalCount, url, page, count, btnCount);
-            pageAjaxHref = getPageAjax(totalCount, url, page, count, btnCount);
+            pageAjaxHref = getPageAjax(totalCount, url, page, isVue, func_name, count, btnCount);
             return q.Take(count).ToList();
         }
 
@@ -235,8 +237,18 @@ namespace Common
         /// <param name="count">每页显示的数量</param>
         /// <param name="btnCount">翻页按钮的个数</param>
         /// <returns>翻页的a链接按钮</returns>
-        private string getPageAjax(int totalcount, string url, int page = 1, int count = 10, int btnCount = 5)
+        private string getPageAjax(int totalcount, string url, int page = 1, bool isVue = true, string func_name = "getPageInfo", int count = 10, int btnCount = 5)
         {
+            if (string.IsNullOrWhiteSpace(func_name))
+            {
+                func_name = "getPageInfo";
+            }
+            var evt = "onclick";
+            if (isVue)
+            {
+                evt = "@click";
+            }
+
             #region 计算页数
             int totalPage = 0;  // 总页数
             if (totalcount > 0)
@@ -272,7 +284,7 @@ namespace Common
                 {
                     s += "?page=" + temp;
                 }
-                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>上一页</a>", url + s);
+                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' data-url='{3}' {2}='{1}(\"{0}\")'>上一页</a>", url + s, func_name, evt, url + s);
             }
             #endregion
 
@@ -296,7 +308,7 @@ namespace Common
                         {
                             s += "?page=" + p;
                         }
-                        sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p);
+                        sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' data-url='{4}' {3}='{2}(\"{0}\")'>{1}</a>", url + s, p, func_name, evt, url + s);
                     }
                 }
             }
@@ -313,7 +325,7 @@ namespace Common
                     {
                         s += "?page=" + p1;
                     }
-                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p1);
+                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' data-url='{4}' {3}='{2}(\"{0}\")'>{1}</a>", url + s, p1, func_name, evt, url + s);
                 }
                 sb.AppendFormat("<span class='current'>{0}</span>", page);
                 for (int p2 = page + 1; p2 < page + (btnCount / 2) && p2 <= totalPage; p2++)
@@ -327,7 +339,7 @@ namespace Common
                     {
                         s += "?page=" + p2;
                     }
-                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>{1}</a>", url + s, p2);
+                    sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' data-url='{4}' {3}='{2}(\"{0}\")'>{1}</a>", url + s, p2, func_name, evt, url + s);
                 }
             }
             #endregion
@@ -349,7 +361,7 @@ namespace Common
                 {
                     temp += "?page=" + tpage1;
                 }
-                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' onclick='getPageInfo(\"{0}\")'>下一页</a>", url + temp);
+                sb.AppendFormat("<a class='btn btn-sm' href='javascript:;' data-url='{3}' {2}='{1}(\"{0}\")'>下一页</a>", url + temp, func_name, evt, url + temp);
             }
             #endregion
             sb.Append("</div>");

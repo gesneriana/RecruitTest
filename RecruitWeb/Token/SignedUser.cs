@@ -8,6 +8,8 @@ namespace RecruitWeb.Token
 {
     /// <summary>
     /// 登录的用户, 将用户登录凭证保存在缓存中, 比如 redis 和 memorycache
+    /// 可以将此对象以同一个实例以不同的key 存储, user_uuid 和 guid
+    /// 两次登录的时候, 更改 guid , 若 Token中的guid和登录的用户不同, 则被认为挤掉线了
     /// </summary>
     public class SignedUser
     {
