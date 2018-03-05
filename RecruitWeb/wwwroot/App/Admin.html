@@ -55,7 +55,7 @@
                                 </td>
                                 <td>{{item.addtime | format_date}}</td>
                                 <td>
-                                    <button @click="change_job_state(index)" class="btn btn-primary" type="button">
+                                    <button @click="change_job_state(index)" v-bind:class="{'btn-primary':item.is_enabled,'btn-warning':!item.is_enabled}" class="btn" type="button">
                                         <template v-if="item.is_enabled">
                                             禁用
                                         </template>
@@ -201,7 +201,7 @@
                                     </template>
                                 </td>
                                 <td>
-                                    <button @click="disable_exam(index)" class="btn btn-primary" type="button">
+                                    <button @click="disable_exam(index)" v-bind:class="{'btn-primary':item.is_enabled,'btn-warning':!item.is_enabled}" class="btn" type="button">
                                         <template v-if="item.is_enabled==true">
                                             禁用
                                         </template>
