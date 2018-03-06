@@ -34,7 +34,7 @@ namespace Recruit.Models
         /// <summary>
         /// 是否可用, 默认为true
         /// </summary>
-        public bool is_enabled{get;set;}=true;
+        public bool is_enabled { get; set; } = true;
 
         /// <summary>
         /// 添加时间

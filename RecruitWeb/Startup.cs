@@ -38,6 +38,8 @@ namespace RecruitWeb
             Config.configuration = Configuration;
             services.AddMvc();
             services.AddOptions();
+            services.AddResponseCaching();
+            services.AddResponseCompression();
             // 加载JwtTokenConfig的配置文件
             services.Configure<JwtTokenConfig>(Configuration.GetSection("JwtTokenConfig"));
             #region 根据配置文件加载不同的数据库
@@ -76,6 +78,8 @@ namespace RecruitWeb
             }
 
             app.UseStaticFiles();
+            app.UseResponseCaching();
+            app.UseResponseCompression();
 
             app.UseMvc(routes =>
             {
