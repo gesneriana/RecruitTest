@@ -53,8 +53,21 @@ namespace RecruitWeb.Controllers
                 List<object> list = new List<object>();
                 temp.ForEach(x =>
                 {
-                    var a = new { x.company_address, x.company_code, x.company_contact, x.company_name, x.uuid };
-                    list.Add(a);
+                    var a = new
+                    {
+                        x.company_address,
+                        x.company_code,
+                        x.company_contact,
+                        x.company_name,
+                        x.uuid,
+                        jobs = dbContext.job_type.Where(m => m.user_id.Equals(x.uuid) && m.is_enabled == true)
+                        .Select(t => new { t.uuid, t.job_name }).ToList(),
+                        job_id = string.Empty   // 绑定下拉框的字段, 占位用的
+                    };
+                    if (a.jobs != null && a.jobs.Count > 0)
+                    {
+                        list.Add(a);
+                    }
                 });
 
                 return Json(new { list, pages });
@@ -78,5 +91,55 @@ namespace RecruitWeb.Controllers
             }
 
         }
+
+        /// <summary>
+        /// 获取测试题数据
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public IActionResult get_exam_by_job_id(string id)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var list = dbContext.exam_data.Where(x => x.job_id.Equals(id) && x.is_enabled == true).OrderBy(x => x.exam_type)
+                    .Select(x => new
+                    {
+                        x.anwser_a,
+                        x.anwser_b,
+                        x.anwser_c,
+                        x.anwser_d,
+                        x.exam_content,
+                        x.exam_type,
+                        exam_eq_answer = "",
+                        x.id
+                    }).ToList();
+                return Json(list);
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
     }
 }

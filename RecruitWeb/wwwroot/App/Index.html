@@ -10,20 +10,20 @@
     <link href="../css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="app" v-cloak>
+    <div id="app" v-cloak style="padding-bottom:60px;">
         <div class="container-fluid">
             <div class="row center-block" style="width:1200px;min-height:50px;line-height:50px;">
 
                 <!--导航区-->
-                <div v-show="hasToken" class="col-lg-9">
+                <div v-show="hasToken" class="col-lg-10">
                     <ul class="nav nav-tabs" role="tablist">
                         <li role="presentation" class="active"><a href="#company_list" role="tab" data-toggle="tab">公司列表</a></li>
                         <li role="presentation"><a role="tab" @click="" data-toggle="tab" href="#invit_code">查看面试邀请码</a></li>
                     </ul>
                 </div>
 
-                <div v-show="hasToken" class="col-lg-3">
-                    <a href="" @click="signUp" class="btn btn-primary">注销</a>
+                <div v-show="hasToken" class="col-lg-2 text-right">
+                    <a href="" @click="signUp" class="btn btn-info">注销</a>
                 </div>
             </div>
         </div>
@@ -32,8 +32,65 @@
 
             <!--登录后显示的主题内容-->
             <div v-if="bodyContent=='init'" class="center-block container-fluid tab-content">
+
                 <div role="tabpanel" class="tab-pane active" id="company_list">
-                    显示主要内容
+                    <div v-show="!show_exam_list.show">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td>公司名称</td>
+                                <td title="统一社会信用代码">公司代码</td>
+                                <td>公司地址</td>
+                                <td>联系方式</td>
+                                <td>查看测试题</td>
+                            </tr>
+                            <tr v-for="(item,index) in show_company_list.list">
+                                <td>{{item.company_name}}</td>
+                                <td>{{item.company_code}}</td>
+                                <td>{{item.company_address}}</td>
+                                <td>{{item.company_contact}}</td>
+                                <td class="text-center">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <select class="form-control" v-model="item.job_id">
+                                                <option v-for="(job,i) in item.jobs" :value="job.uuid">{{job.job_name}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button @click="show_exam_by_job_id(index)" class="btn btn-primary" type="button">查看</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div>{{show_company_list.pages}}</div>
+                    </div>
+
+                    <div v-show="show_exam_list.show">
+                        <div class="row">
+                            <div class="col-lg-4 col-lg-offset-4 text-center h3">{{show_exam_list.job_name}}测试题</div>
+                            <div class="col-lg-4 text-right">
+                                <button @click="change_company_state" type="button" class="btn btn-info">返回</button>
+                            </div>
+                        </div>
+                        <div>
+                            <template v-for="(item,index) in show_exam_list.list">
+                                <div class="lead">{{index+1}}.&emsp;{{item.exam_content}}</div>
+                                <div v-if="item.exam_type=='cq'" class="row lead">
+                                    <div class="col-lg-3"><label><input type="radio" value="A" v-model="item.exam_eq_answer" />A</label></div>
+                                    <div class="col-lg-3"><label><input type="radio" value="B" v-model="item.exam_eq_answer" />B</label></div>
+                                    <div class="col-lg-3"><label><input type="radio" value="C" v-model="item.exam_eq_answer" />C</label></div>
+                                    <div class="col-lg-3"><label><input type="radio" value="D" v-model="item.exam_eq_answer" />D</label></div>
+                                </div>
+                                <div v-if="item.exam_type=='eq'">
+                                    <textarea style="width:60%;" rows="5" v-model="item.exam_eq_answer"></textarea>
+                                </div>
+                            </template>
+
+                            <div class="text-center">
+                                <button @click="submit_exam_data" class="btn btn-primary" type="button">提交</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div role="tabpanel" class="tab-pane" id="invit_code">
@@ -213,6 +270,11 @@
                 show_company_list: {
                     list: {},   // 公司名称列表
                     pages: ''
+                },
+                show_exam_list: {
+                    list: {},   // 试题数据列表
+                    show: false,
+                    job_name: ''    // 用户查看的测试题的 岗位名称, 下拉框的值
                 }
             },
 
@@ -231,6 +293,11 @@
                     }).then(function (response) {
                         this.show_company_list.list = response.body.list;
                         this.show_company_list.pages = response.body.pages;
+                        for (var i = 0; i < this.show_company_list.list.length; i++) {
+                            if (this.show_company_list.list[i].jobs.length > 0) {
+                                this.show_company_list.list[i].job_id = this.show_company_list.list[i].jobs[0].uuid;
+                            }
+                        }
                     });
                 } else {
                     // 没有token, 显示登录的模板
@@ -264,6 +331,11 @@
                                 }).then(function (response) {
                                     this.show_company_list.list = response.body.list;
                                     this.show_company_list.pages = response.body.pages;
+                                    for (var i = 0; i < this.show_company_list.list.length; i++) {
+                                        if (this.show_company_list.list[i].jobs.length > 0) {
+                                            this.show_company_list.list[i].job_id = this.show_company_list.list[i].jobs[0].uuid;
+                                        }
+                                    }
                                 });
                             }
                         } else {
@@ -364,6 +436,43 @@
                             alert(response);
                         }
                     });
+                },
+                // 根据岗位id加载数据
+                show_exam_by_job_id(index) {
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Recruit/get_exam_by_job_id/' + this.show_company_list.list[index].job_id,
+                        body: { user: this.signUserData },
+                        timeout: 3000,
+                    }).then(function (response) {
+                        if (response.status == 200) {
+                            for (var i = 0; i < this.show_company_list.list[index].jobs.length; i++) {
+                                if (this.show_company_list.list[index].job_id == this.show_company_list.list[index].jobs[i].uuid) {
+                                    this.show_exam_list.job_name = this.show_company_list.list[index].jobs[i].job_name;
+                                }
+                            }
+                            this.show_exam_list.list = response.body;
+                            this.show_exam_list.show = !this.show_exam_list.show;
+                            console.log(response.body);
+                        } else {
+                            alert(response);
+                        }
+                    });
+                },
+                // 显示公司名称列表
+                change_company_state: function () {
+                    this.show_exam_list.show = !this.show_exam_list.show;
+                },
+                // 提交测试数据
+                submit_exam_data: function () {
+                    for (var i = 0; i < this.show_exam_list.list.length; i++) {
+                        this.show_exam_list.list[i].exam_eq_answer = $.trim(this.show_exam_list.list[i].exam_eq_answer);
+                        if (this.show_exam_list.list[i].exam_eq_answer.length == 0) {
+                            alert("请输入" + (i + 1) + "题的数据");
+                            return;
+                        }
+                    }
+                    // 提交到服务器
                 }
             }
         });
