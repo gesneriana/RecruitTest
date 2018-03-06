@@ -452,6 +452,10 @@
                                 }
                             }
                             this.show_exam_list.list = response.body;
+                            if (this.show_exam_list.list.length == 0) {
+                                alert('暂无数据');
+                                return;
+                            }
                             this.show_exam_list.show = !this.show_exam_list.show;
                             console.log(response.body);
                         } else {
