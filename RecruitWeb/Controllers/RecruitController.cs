@@ -45,9 +45,9 @@ namespace RecruitWeb.Controllers
 
             try
             {
-                var p = new EFPaging<recruit_user>();
+                var p = new EFPaging<recruit_user>();   // 查询公司数据
                 var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company")).OrderBy(x => x.addtime);
-                var temp = p.getPageList(q, "/api/company/get_exam_data?page=", page);
+                var temp = p.getPageList(q, "/api/Recruit/get_company_list?page=", page);
                 var pages = p.pageAjaxHref;
 
                 List<object> list = new List<object>();
@@ -121,6 +121,81 @@ namespace RecruitWeb.Controllers
                         x.id
                     }).ToList();
                 return Json(list);
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
+        public IActionResult search_company_list(string com_type, string keywords, int page = 1)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(com_type) || string.IsNullOrWhiteSpace(keywords))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(com_type) + "或" + nameof(keywords) + "参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                List<recruit_user> temp = null;
+                var pages = string.Empty;
+                var p = new EFPaging<recruit_user>();
+                if (com_type.Equals("com_name"))
+                {
+                    var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_name.Contains(keywords)).OrderBy(x => x.addtime);
+                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    pages = p.pageAjaxHref;
+                }
+                else if (com_type.Equals("com_code"))
+                {
+                    var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_code.Contains(keywords)).OrderBy(x => x.addtime);
+                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    pages = p.pageAjaxHref;
+                }
+                else if (com_type.Equals("com_addr"))
+                {
+                    var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_address.Contains(keywords)).OrderBy(x => x.addtime);
+                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    pages = p.pageAjaxHref;
+                }
+
+
+                List<object> list = new List<object>();
+                temp.ForEach(x =>
+                {
+                    var a = new
+                    {
+                        x.company_address,
+                        x.company_code,
+                        x.company_contact,
+                        x.company_name,
+                        x.uuid,
+                        jobs = dbContext.job_type.Where(m => m.user_id.Equals(x.uuid) && m.is_enabled == true)
+                        .Select(t => new { t.uuid, t.job_name }).ToList(),
+                        job_id = string.Empty   // 绑定下拉框的字段, 占位用的
+                    };
+                    if (a.jobs != null && a.jobs.Count > 0)
+                    {
+                        list.Add(a);
+                    }
+                });
+
+                return Json(new { list, pages });
             }
             catch (DbUpdateException dbex)
             {

@@ -38,13 +38,13 @@
 
                         <div style="padding-bottom:20px;padding-top:10px;">
                             <form role="form" class="form-inline">
-                                <select class="form-control">
+                                <select class="form-control" v-model="search_company_data.company_condition">
                                     <option value="com_name">公司名称</option>
                                     <option value="com_code">公司代码</option>
                                     <option value="com_addr">公司地址</option>
                                 </select>
-                                <input type="text" class="form-control" placeholder="请输入关键字查找"/>
-                                <input type="button" class="btn btn-default btn-toolbar btn-info" value="查找"/>
+                                <input type="text" v-model="search_company_data.company_keywords" class="form-control" placeholder="请输入关键字查找" />
+                                <input type="button" @click="search_company" class="btn btn-default btn-toolbar btn-info" value="查找" />
                             </form>
                         </div>
 
@@ -288,6 +288,10 @@
                     list: {},   // 试题数据列表
                     show: false,
                     job_name: ''    // 用户查看的测试题的 岗位名称, 下拉框的值
+                },
+                search_company_data: {
+                    company_condition: 'com_name',
+                    company_keywords: ''    // 搜索公司的条件类型和关键字
                 }
             },
 
@@ -489,6 +493,28 @@
                         }
                     }
                     // 提交到服务器
+                },
+                // 根据条件搜索公司数据的方法
+                search_company: function () {
+                    if ($.trim(this.search_company_data.company_keywords).length > 0) {
+                        this.$http({
+                            method: 'post',
+                            url: '/api/Recruit/search_company_list',
+                            timeout: 3000,
+                            body: {
+                                com_type: this.search_company_data.company_condition,
+                                keywords: $.trim(this.search_company_data.company_keywords)
+                            }
+                        }).then(function (response) {
+                            this.show_company_list.list = response.body.list;
+                            this.show_company_list.pages = response.body.pages;
+                            for (var i = 0; i < this.show_company_list.list.length; i++) {
+                                if (this.show_company_list.list[i].jobs.length > 0) {
+                                    this.show_company_list.list[i].job_id = this.show_company_list.list[i].jobs[0].uuid;
+                                }
+                            }
+                        });
+                    }
                 }
             }
         });
