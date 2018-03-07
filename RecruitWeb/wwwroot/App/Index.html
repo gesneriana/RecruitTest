@@ -75,7 +75,7 @@
                                 </td>
                             </tr>
                         </table>
-                        <div>{{show_company_list.pages}}</div>
+                        <div v-html="show_company_list.pages" @click="get_com_pages_proxy($event)"></div>
                     </div>
 
                     <div v-show="show_exam_list.show">
@@ -456,6 +456,10 @@
                 },
                 // 根据岗位id加载数据
                 show_exam_by_job_id(index) {
+                    if (this.show_company_list.list[index].job_id.length == 0) {
+                        alert('暂无数据');
+                        return;
+                    }
                     this.$http({
                         method: 'post',
                         url: '/api/Recruit/get_exam_by_job_id/' + this.show_company_list.list[index].job_id,
@@ -505,6 +509,25 @@
                                 com_type: this.search_company_data.company_condition,
                                 keywords: $.trim(this.search_company_data.company_keywords)
                             }
+                        }).then(function (response) {
+                            this.show_company_list.list = response.body.list;
+                            this.show_company_list.pages = response.body.pages;
+                            for (var i = 0; i < this.show_company_list.list.length; i++) {
+                                if (this.show_company_list.list[i].jobs.length > 0) {
+                                    this.show_company_list.list[i].job_id = this.show_company_list.list[i].jobs[0].uuid;
+                                }
+                            }
+                        });
+                    }
+                },
+                // 获取公司数据的翻页按钮代理事件
+                get_com_pages_proxy: function (event) {
+                    if (event.target.nodeName.toLowerCase() == 'a') {
+                        console.log($(event.target).attr("data-url"));
+                        this.$http({
+                            method: 'post',
+                            url: $(event.target).attr("data-url"),
+                            timeout: 3000,
                         }).then(function (response) {
                             this.show_company_list.list = response.body.list;
                             this.show_company_list.pages = response.body.pages;

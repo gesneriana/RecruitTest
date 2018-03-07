@@ -47,7 +47,7 @@ namespace RecruitWeb.Controllers
             {
                 var p = new EFPaging<recruit_user>();   // 查询公司数据
                 var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company")).OrderBy(x => x.addtime);
-                var temp = p.getPageList(q, "/api/Recruit/get_company_list?page=", page);
+                var temp = p.getPageList(q, "/api/Recruit/get_company_list", page);
                 var pages = p.pageAjaxHref;
 
                 List<object> list = new List<object>();
@@ -64,10 +64,7 @@ namespace RecruitWeb.Controllers
                         .Select(t => new { t.uuid, t.job_name }).ToList(),
                         job_id = string.Empty   // 绑定下拉框的字段, 占位用的
                     };
-                    if (a.jobs != null && a.jobs.Count > 0)
-                    {
-                        list.Add(a);
-                    }
+                    list.Add(a);
                 });
 
                 return Json(new { list, pages });
@@ -158,19 +155,19 @@ namespace RecruitWeb.Controllers
                 if (com_type.Equals("com_name"))
                 {
                     var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_name.Contains(keywords)).OrderBy(x => x.addtime);
-                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    temp = p.getPageList(q, string.Format("/api/Recruit/search_company_list?com_type={0}&keywords={1}", com_type, keywords), page);
                     pages = p.pageAjaxHref;
                 }
                 else if (com_type.Equals("com_code"))
                 {
                     var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_code.Contains(keywords)).OrderBy(x => x.addtime);
-                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    temp = p.getPageList(q, string.Format("/api/Recruit/search_company_list?com_type={0}&keywords={1}", com_type, keywords), page);
                     pages = p.pageAjaxHref;
                 }
                 else if (com_type.Equals("com_addr"))
                 {
                     var q = dbContext.recruit_user.Where(x => x.auth_role.Equals("company") && x.company_address.Contains(keywords)).OrderBy(x => x.addtime);
-                    temp = p.getPageList(q, string.Format("/api/company/search_company_list?com_type={0}&keywords={1}&page=", com_type, keywords), page);
+                    temp = p.getPageList(q, string.Format("/api/Recruit/search_company_list?com_type={0}&keywords={1}", com_type, keywords), page);
                     pages = p.pageAjaxHref;
                 }
 
@@ -189,10 +186,7 @@ namespace RecruitWeb.Controllers
                         .Select(t => new { t.uuid, t.job_name }).ToList(),
                         job_id = string.Empty   // 绑定下拉框的字段, 占位用的
                     };
-                    if (a.jobs != null && a.jobs.Count > 0)
-                    {
-                        list.Add(a);
-                    }
+                    list.Add(a);
                 });
 
                 return Json(new { list, pages });
