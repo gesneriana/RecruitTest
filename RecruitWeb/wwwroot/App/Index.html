@@ -35,6 +35,19 @@
 
                 <div role="tabpanel" class="tab-pane active" id="company_list">
                     <div v-show="!show_exam_list.show">
+
+                        <div style="padding-bottom:20px;padding-top:10px;">
+                            <form role="form" class="form-inline">
+                                <select class="form-control">
+                                    <option value="com_name">公司名称</option>
+                                    <option value="com_code">公司代码</option>
+                                    <option value="com_addr">公司地址</option>
+                                </select>
+                                <input type="text" class="form-control" placeholder="请输入关键字查找"/>
+                                <input type="button" class="btn btn-default btn-toolbar btn-info" value="查找"/>
+                            </form>
+                        </div>
+
                         <table class="table table-bordered table-striped">
                             <tr>
                                 <td>公司名称</td>
@@ -442,8 +455,7 @@
                     this.$http({
                         method: 'post',
                         url: '/api/Recruit/get_exam_by_job_id/' + this.show_company_list.list[index].job_id,
-                        body: { user: this.signUserData },
-                        timeout: 3000,
+                        timeout: 3000
                     }).then(function (response) {
                         if (response.status == 200) {
                             for (var i = 0; i < this.show_company_list.list[index].jobs.length; i++) {
