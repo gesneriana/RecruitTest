@@ -499,7 +499,7 @@
                     for (var i = 0; i < this.show_exam_list.list.length; i++) {
                         this.show_exam_list.list[i].exam_eq_answer = $.trim(this.show_exam_list.list[i].exam_eq_answer);
                         if (this.show_exam_list.list[i].exam_eq_answer.length == 0) {
-                            alert("请输入" + (i + 1) + "题的数据");
+                            alert("请输入第" + (i + 1) + "题的数据");
                             return;
                         }
                     }
@@ -520,6 +520,8 @@
                         }
                     }).then(function (response) {
                         console.log(response.body);
+                        alert(response.body);
+                        this.show_exam_list.show = !this.show_exam_list.show;
                     });
                 },
                 // 根据条件搜索公司数据的方法

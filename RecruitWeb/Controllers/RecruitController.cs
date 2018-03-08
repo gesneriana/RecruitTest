@@ -240,7 +240,7 @@ namespace RecruitWeb.Controllers
                     });
                     dbContext.user_score.Add(score);
                     dbContext.SaveChanges();
-                    return Content("保存成功");
+                    return Content("提交成功");
                 }
                 catch (DbUpdateException dbex)
                 {

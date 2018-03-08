@@ -75,7 +75,8 @@ namespace RecruitWeb.Controllers
             ErrorRequestData err = null;
             try
             {
-                var list = dbContext.job_type.Where(x => x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.is_enabled).ToList();
+                // 只显示 可用 状态的岗位
+                var list = dbContext.job_type.Where(x => x.user_id.Equals(signedUser.user_uuid) && x.is_enabled == true).OrderBy(x => x.is_enabled).ToList();
                 return Json(list);
             }
             catch (DbUpdateException dbex)
