@@ -12,13 +12,13 @@ namespace Recruit.Models
     public class user_score
     {
         /// <summary>
-        /// 主键
+        /// 主键, 初始化自动设置默认值
         /// </summary>
         [Key, MaxLength(60)]
         public string id { get; set; } = UUID.getUUID();
 
         /// <summary>
-        /// 面试的岗位 id
+        /// 面试的岗位 id , 岗位id -> 测试题列表
         /// </summary>
         [Required, MaxLength(60)]
         public string job_id { get; set; }
@@ -40,8 +40,8 @@ namespace Recruit.Models
         public int eq_score { get; set; }
 
         /// <summary>
-        /// 添加时间
+        /// 添加时间, 默认为当前时间
         /// </summary>
-        public DateTime addtime { get; set; }
+        public DateTime addtime { get; set; } = DateTime.Now;
     }
 }

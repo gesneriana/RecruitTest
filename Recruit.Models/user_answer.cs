@@ -11,6 +11,9 @@ namespace Recruit.Models
     /// </summary>
     public class user_answer
     {
+        /// <summary>
+        /// 主键, 默认值为 uuid
+        /// </summary>
         [Key]
         [MaxLength(60)]
         public string id { get; set; } = UUID.getUUID();

@@ -213,6 +213,7 @@ namespace RecruitWeb.Controllers
         /// <summary>
         /// 提交测试题答案
         /// </summary>
+        /// <param name="job_id"></param>
         /// <param name="list"></param>
         /// <returns></returns>
         public IActionResult submit_exam_data(string job_id, List<user_answer> list)
@@ -222,7 +223,24 @@ namespace RecruitWeb.Controllers
             {
                 try
                 {
-                    return Json(new { job_id, list });
+                    var score = new user_score() { job_id = job_id, user_id = signedUser.user_uuid };
+                    var exam_dict = dbContext.exam_data.Where(x => x.job_id.Equals(job_id)).Select(x => new { x.id, x.exam_type, x.exam_cq_anwser }).ToDictionary(x => x.id);
+                    list.ForEach(x =>
+                    {
+                        if (exam_dict.ContainsKey(x.exam_id))
+                        {
+                            if (x.exam_type.Equals("cq") && x.exam_answer.Equals(exam_dict[x.exam_id].exam_cq_anwser))
+                            {
+                                ++score.cq_score;
+                            }
+                            x.id = UUID.getUUID();
+                            x.user_score_id = score.id;
+                            dbContext.user_answer.Add(x);
+                        }
+                    });
+                    dbContext.user_score.Add(score);
+                    dbContext.SaveChanges();
+                    return Content("保存成功");
                 }
                 catch (DbUpdateException dbex)
                 {

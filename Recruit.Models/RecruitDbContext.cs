@@ -36,5 +36,15 @@ namespace Recruit.Models
         /// 试题数据, 以及参考答案
         /// </summary>
         public DbSet<exam_data> exam_data { get; set; }
+
+        /// <summary>
+        /// 用户测试题 分数记录
+        /// </summary>
+        public DbSet<user_score> user_score { get; set; }
+
+        /// <summary>
+        /// 用户填写的测试题答案
+        /// </summary>
+        public DbSet<user_answer> user_answer { get; set; }
     }
 }
