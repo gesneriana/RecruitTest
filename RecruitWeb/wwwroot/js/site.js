@@ -56,33 +56,19 @@ Vue.http.interceptors.push(function (request, next) {
     })
 });
 
-function padLeftZero(str) {
+function padLeftZero(val) {
+    var str = '' + val;
     return ('00' + str).substr(str.length);
 }
 
-function formatDate(value, fmt) {
+function formatDate(value) {
     var date = new Date(value);
-    if (/(y+)/.test(fmt)) {
-        fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
-    }
-    let o = {
-        'M+': date.getMonth() + 1,
-        'd+': date.getDate(),
-        'h+': date.getHours(),
-        'm+': date.getMinutes(),
-        's+': date.getSeconds()
-    }
-    for (let k in o) {
-        let str = o[k] + '';
-        if (new RegExp(`(${k})`).test(fmt)) {
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? str : padLeftZero(str));
-        }
-    }
-    return fmt;
+    var str = date.getFullYear() + "-" + padLeftZero(date.getMonth()) + '-' + padLeftZero(date.getDate()) + ' ' + padLeftZero(date.getHours()) + ":" + padLeftZero(date.getMinutes()) + ":" + padLeftZero(date.getSeconds());
+    return str;
 };
 
 // 日期格式化过滤器
 Vue.filter('format_date', function (value) {
     if (!value instanceof Date) return value;
-    return formatDate(value, 'yyyy-MM-dd hh:mm:ss');
+    return formatDate(value);
 })

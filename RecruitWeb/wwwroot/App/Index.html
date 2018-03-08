@@ -256,6 +256,7 @@
     <!-- 想要立即刷新客户端缓存可以再url后面加参数 ?ver=xxx -->
     <script src="../js/site.js"></script>
     <script type="text/javascript">
+
         // 当前html页面的Vue实例
         var vm = new Vue({
             el: '#app',
@@ -287,7 +288,8 @@
                 show_exam_list: {
                     list: {},   // 试题数据列表
                     show: false,
-                    job_name: ''    // 用户查看的测试题的 岗位名称, 下拉框的值
+                    job_name: '',    // 用户查看的测试题的 岗位名称, 下拉框的值
+                    job_id: ''  // 岗位id
                 },
                 search_company_data: {
                     company_condition: 'com_name',
@@ -326,6 +328,10 @@
             methods: {
                 // 登录api, 获取token
                 getJwtToken: function () {
+                    if ($.trim(this.uname).length == 0 || $.trim(this.pwd).length == 0) {
+                        alert("请输入用户名或者密码");
+                        return;
+                    }
                     this.$http({
                         method: 'post',
                         url: '/api/account/login',
@@ -455,7 +461,7 @@
                     });
                 },
                 // 根据岗位id加载数据
-                show_exam_by_job_id(index) {
+                show_exam_by_job_id: function (index) {
                     if (this.show_company_list.list[index].job_id.length == 0) {
                         alert('暂无数据');
                         return;
@@ -469,6 +475,7 @@
                             for (var i = 0; i < this.show_company_list.list[index].jobs.length; i++) {
                                 if (this.show_company_list.list[index].job_id == this.show_company_list.list[index].jobs[i].uuid) {
                                     this.show_exam_list.job_name = this.show_company_list.list[index].jobs[i].job_name;
+                                    this.show_exam_list.job_id = this.show_company_list.list[index].jobs[i].uuid;
                                 }
                             }
                             this.show_exam_list.list = response.body;
@@ -497,6 +504,23 @@
                         }
                     }
                     // 提交到服务器
+                    var answer_list = [];
+                    for (var i = 0; i < this.show_exam_list.list.length; i++) {
+                        var temp = { exam_id: this.show_exam_list.list[i].id, exam_type: this.show_exam_list.list[i].exam_type, exam_answer: this.show_exam_list.list[i].exam_eq_answer };
+                        answer_list.push(temp);
+                    }
+
+                    this.$http({
+                        method: 'post',
+                        url: '/api/Recruit/submit_exam_data',
+                        timeout: 3000,
+                        body: {
+                            job_id: this.show_exam_list.job_id,
+                            list: answer_list
+                        }
+                    }).then(function (response) {
+                        console.log(response.body);
+                    });
                 },
                 // 根据条件搜索公司数据的方法
                 search_company: function () {

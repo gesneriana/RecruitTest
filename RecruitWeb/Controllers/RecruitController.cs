@@ -210,5 +210,44 @@ namespace RecruitWeb.Controllers
             }
         }
 
+        /// <summary>
+        /// 提交测试题答案
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public IActionResult submit_exam_data(string job_id, List<user_answer> list)
+        {
+            ErrorRequestData err = null;
+            if (list != null && list.Count > 0 && !string.IsNullOrWhiteSpace(job_id))
+            {
+                try
+                {
+                    return Json(new { job_id, list });
+                }
+                catch (DbUpdateException dbex)
+                {
+                    if (dbex.InnerException is PostgresException npge)
+                    {
+                        err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                    }
+                    else
+                    {
+                        err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                    }
+                    return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+                }
+                catch (Exception ex)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                    return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+                }
+            }
+            else
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(job_id) + "或" + nameof(list) + "参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+        }
+
     }
 }
