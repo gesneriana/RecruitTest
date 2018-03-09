@@ -13,9 +13,9 @@
                 <!--导航区-->
                 <ul class="nav nav-tabs" role="tablist">
                     <li role="presentation" class="active"><a href="#Job" role="tab" data-toggle="tab">面试岗位设置</a></li>
-                    <li role="presentation"><a href="#quizzes" role="tab" @click="set_job_id_index" data-toggle="tab">面试试题设置</a></li>
+                    <li role="presentation"><a href="#quizzes" role="tab" @click="set_job_id_index" data-toggle="tab">添加面试题</a></li>
                     <li role="presentation"><a href="#exam_data_pane" role="tab" @click="get_exam_data" data-toggle="tab">查看面试题</a></li>
-                    <li role="presentation"><a href="#exam_data_consult" role="tab" data-toggle="tab">查阅面试题</a> </li>
+                    <li role="presentation"><a href="#exam_data_consult" @click="get_user_answer" role="tab" data-toggle="tab">查阅面试题</a> </li>
                     <li role="presentation"><a href="" @click="signUp" class="btn btn-primary">注销</a></li>
                 </ul>
             </div>
@@ -25,6 +25,7 @@
             <!--面板区-->
             <div class="center-block tab-content" style="width:1200px;min-height:600px;">
 
+                <!--面试岗位设置-->
                 <div role="tabpanel" class="tab-pane active" id="Job">
                     <!--添加岗位-->
                     <div class="text-center" style="min-height:60px;line-height:60px;">
@@ -73,6 +74,7 @@
                     </div>
                 </div>
 
+                <!--添加面试题-->
                 <div role="tabpanel" class="tab-pane" id="quizzes">
                     <!--新增试题的表单-->
                     <div class="text-center container-fluid" style="width:500px;padding-top:30px;">
@@ -157,6 +159,7 @@
                     </div>
                 </div>
 
+                <!-- 查看面试题 -->
                 <div role="tabpanel" class="tab-pane" id="exam_data_pane">
                     <div>
                         <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
@@ -218,8 +221,28 @@
                     </div>
                 </div>
 
+                <!--查阅面试题-->
                 <div id="exam_data_consult" role="tabpanel" class="tab-pane">
-                    查阅面试题
+                    <div>
+                        <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
+                            <select @change="change_show_exam_data" class="form-control" v-model="show_exam_data.job_id">
+                                <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td>用户名</td>
+                                <td>手机号</td>
+                                <td>邮箱</td>
+                                <td>选择题正确数量</td>
+                                <td>答题日期</td>
+                                <td>查看试题详情</td>
+                                <td>发送邀请码</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -440,7 +463,17 @@
                         console.info(response.body);
                         this.show_exam_data.list[index].is_enabled = state;
                     });
-
+                },
+                // 根据岗位获取用户测试题答案数据
+                get_user_answer: function () {
+                    this.$http({
+                        method: 'post',
+                        url: "/api/company/get_user_answer/" + this.show_exam_data.job_id,
+                        timeout: 3000
+                    }).then(function (response) {
+                        console.info(response.body);
+                    });
+                    
                 }
             }
         });

@@ -278,7 +278,7 @@ namespace RecruitWeb.Controllers
             try
             {
                 var p = new EFPaging<exam_data>();
-                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid)).OrderBy(x => x.exam_type);
+                var q = dbContext.exam_data.Where(x => x.job_id.Equals(job_id) && x.user_id.Equals(signedUser.user_uuid)).OrderByDescending(x => x.is_enabled).OrderBy(x => x.exam_type);
                 var list = p.getPageList(q, "/api/company/get_exam_data?job_id=" + job_id, page);
                 var pages = p.pageAjaxHref;
 
@@ -346,5 +346,47 @@ namespace RecruitWeb.Controllers
                 return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
             }
         }
+
+        /// <summary>
+        /// 根据岗位id查找 用户的测试题答案
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public IActionResult get_user_answer(string id)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var q = from s in dbContext.user_score
+                        join u in dbContext.recruit_user on s.user_id equals u.uuid
+                        where s.job_id == id
+                        select new { u.uname, s.cq_score, s.addtime, u.phone, u.email, s.id };
+                var p = new EFPaging<string> ();    // 需要定义视图模型
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
     }
 }
