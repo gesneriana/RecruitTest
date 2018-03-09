@@ -45,6 +45,6 @@ namespace Recruit.Models
         /// <summary>
         /// 添加时间
         /// </summary>
-        public DateTime addTime { get; set; } = DateTime.Now;
+        public DateTime addtime { get; set; } = DateTime.Now;
     }
 }
