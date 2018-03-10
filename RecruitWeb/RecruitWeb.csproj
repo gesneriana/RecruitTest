@@ -23,5 +23,6 @@
     <ProjectReference Include="..\Recruit.Data\Recruit.Data.csproj" />
     <ProjectReference Include="..\Recruit.Models\Recruit.Models.csproj" />
   </ItemGroup>
-
+  <Target Name="GatherAllFilesToPublish">
+  </Target>
 </Project>
