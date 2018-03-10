@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Recruit.Models;
 using RecruitWeb.Models;
+using RecruitWeb.Models.ViewModel;
 using RecruitWeb.Token;
 
 namespace RecruitWeb.Controllers
@@ -352,10 +353,10 @@ namespace RecruitWeb.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public IActionResult get_user_answer(string id)
+        public IActionResult get_user_answer(string id, int page = 1)
         {
             ErrorRequestData err = null;
-            if (string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(id) || page < 1)
             {
                 err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
                 return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
@@ -366,8 +367,168 @@ namespace RecruitWeb.Controllers
                 var q = from s in dbContext.user_score
                         join u in dbContext.recruit_user on s.user_id equals u.uuid
                         where s.job_id == id
-                        select new { u.uname, s.cq_score, s.addtime, u.phone, u.email, s.id };
-                var p = new EFPaging<string> ();    // 需要定义视图模型
+                        select new user_score_info
+                        {
+                            uname = u.uname,
+                            cq_score = s.cq_score,
+                            eq_score = s.eq_score,
+                            invitation_code = s.invitation_code,
+                            addtime = s.addtime,
+                            phone = u.phone,
+                            email = u.email,
+                            id = s.id
+                        };
+                var p = new EFPaging<user_score_info>();    // 需要定义视图模型
+                var list = p.getPageList(q, "/api/company/get_user_answer/" + id, page);
+                var pages = p.pageAjaxHref;
+                return Json(new { list, pages });
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
+        /// <summary>
+        /// 根据 user_score 的id获取 user_answer 所有答题的记录
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public IActionResult get_user_answer_by_id(string id)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                // 此处应改为联合查询, 加载测试题的数据
+                var list = from a in dbContext.user_answer
+                           join e in dbContext.exam_data on a.exam_id equals e.id
+                           where a.user_score_id.Equals(id)
+                           orderby e.exam_type
+                           select new
+                           {
+                               a.id,
+                               a.addtime,
+                               a.exam_answer,
+                               a.exam_type,
+                               e.exam_content,
+                               e.exam_cq_anwser,
+                               e.exam_eq_answer
+                           };
+                return Json(list.ToList());
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
+        /// <summary>
+        /// 设置用户的笔试题分数
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="score"></param>
+        /// <returns></returns>
+        public IActionResult set_user_score(string id, int score = 0)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var m = dbContext.user_score.Where(x => x.id.Equals(id)).FirstOrDefault();
+                if (m != null)
+                {
+                    m.eq_score = score;
+                    dbContext.SaveChanges();
+                }
+                return Content("设置成功");
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
+        /// <summary>
+        /// 设置邀请码
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public IActionResult set_invitation_code(string id)
+        {
+            ErrorRequestData err = null;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 401, ErrorMessage = nameof(id) + "或者参数错误" };
+                return new ContentResult() { Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType, StatusCode = err.HttpStatusCode };
+            }
+
+            try
+            {
+                var m = dbContext.user_score.Where(x => x.id.Equals(id)).FirstOrDefault();
+                if (m != null)
+                {
+                    if (string.IsNullOrWhiteSpace(m.invitation_code))
+                    {
+                        m.invitation_code = Guid.NewGuid().ToString("D").Replace("-", "").Substring(0, 8).ToUpper();
+                    }
+                    else
+                    {
+                        m.invitation_code = string.Empty;
+                    }
+                    dbContext.SaveChanges();
+                    return Json(new { result = true, message = m.invitation_code });
+                }
+                return Json(new { result = false, message = "设置邀请码失败" });
             }
             catch (DbUpdateException dbex)
             {

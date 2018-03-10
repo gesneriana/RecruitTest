@@ -7,7 +7,7 @@
     <link href="../css/site.css" rel="stylesheet" />
 </head>
 <body>
-    <div id="app" v-cloak>
+    <div id="app" v-cloak style="padding-bottom:60px;">
         <div style="background-color:#292D32;">
             <div class="center-block" style="width:1200px;">
                 <!--导航区-->
@@ -223,27 +223,72 @@
 
                 <!--查阅面试题-->
                 <div id="exam_data_consult" role="tabpanel" class="tab-pane">
-                    <div>
-                        <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
-                            <select @change="change_show_exam_data" class="form-control" v-model="show_exam_data.job_id">
-                                <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
-                            </select>
+                    <div v-if="show_user_answer.show==false">
+                        <div>
+                            <div class="center-block container-fluid" style="width:500px;padding-top:30px;padding-bottom:30px;">
+                                <select @change="change_show_exam_data" class="form-control" v-model="show_exam_data.job_id">
+                                    <option v-for="(item,index) in job_name_list" :value="item.uuid">{{item.job_name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <table class="table table-bordered table-striped">
+                                <tr>
+                                    <td>用户名</td>
+                                    <td>手机号</td>
+                                    <td>邮箱</td>
+                                    <td>选择题正确数量</td>
+                                    <td>笔试题分数</td>
+                                    <td>答题日期</td>
+                                    <td>查看试题详情</td>
+                                    <td>设置邀请码</td>
+                                </tr>
+                                <tr v-for="(item,index) in user_exam_list.list">
+                                    <td>{{item.uname}}</td>
+                                    <td>{{item.phone}}</td>
+                                    <td>{{item.email}}</td>
+                                    <td>{{item.cq_score}}</td>
+                                    <td>{{item.eq_score}}</td>
+                                    <td>{{item.addtime | format_date}}</td>
+                                    <td><button type="button" @click="get_user_answer_by_id(index)" class="btn btn-primary">查看笔试题</button></td>
+                                    <td v-bind:title="item.invitation_code.length==0 ? '面试邀请码':item.invitation_code">
+                                        <button type="button" @click="set_invitation_code(index)" v-bind:class="{'btn-primary':item.invitation_code.length==0,'btn-warning':item.invitation_code.length>0}" class="btn">
+                                            <template v-if="item.invitation_code.length==0">
+                                                生成邀请码
+                                            </template>
+                                            <template v-if="item.invitation_code.length>0">
+                                                取消邀请码
+                                            </template>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
-                    <div>
-                        <table class="table table-bordered table-striped">
-                            <tr>
-                                <td>用户名</td>
-                                <td>手机号</td>
-                                <td>邮箱</td>
-                                <td>选择题正确数量</td>
-                                <td>答题日期</td>
-                                <td>查看试题详情</td>
-                                <td>发送邀请码</td>
-                            </tr>
-                        </table>
+
+                    <div v-if="show_user_answer.show">
+                        <div>
+                            <div class="col-lg-6 col-lg-offset-3 text-center h3">{{show_user_answer.uname}}的测试题答案</div>
+                            <div class="col-lg-3 text-right h3">
+                                <button @click="change_show_user_answer" class="btn btn-info btn-default" type="button">返回</button>
+                            </div>
+                        </div>
+                        <div>
+                            <template v-for="(item,index) in show_user_answer.list">
+                                <div class="lead">{{index+1}}. {{item.exam_content}}</div>
+                                <div class="text-primary h5">参考答案:{{item.exam_type=='cq' ? item.exam_cq_anwser : item.exam_eq_answer}}</div>
+                                <div class="text-primary h5">用户的答案:{{item.exam_answer}}</div>
+                            </template>
+                            <div class="text-center">
+                                <form role="form" class="form-inline">
+                                    <input type="number" class="form-control" v-model="show_user_answer.score" placeholder="笔试题的分数0-100之间" />
+                                    <button @click="set_user_score" class="btn btn-primary" type="button">保存</button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -267,7 +312,10 @@
                 // 岗位列表 json 数据, 初始化的时候加载
                 job_name_list: {},
                 // 试题json数据列表
-                exam_list: {},
+                user_exam_list: {
+                    list: {},
+                    pages: ''
+                },
                 // 新增试题的表单绑定数据
                 exam_data: {
                     job_id: '',         // 岗位的id, 不同的岗位对应不同的问题
@@ -285,6 +333,14 @@
                     job_id: '', // 选中的岗位名称, 根据不同的名称加载不同的数据
                     list: {},   // 翻页数据
                     pages: ''   // 翻页按钮
+                },
+                // 根据user_socre_id 查询的用户测试题数据
+                show_user_answer: {
+                    user_score_id: '',  // user_score表的主键
+                    uname: '',  // 测试题答案的用户名
+                    list: {},
+                    score: 0,   // 笔试题的分数
+                    show: false // 默认隐藏, 显示所有用户的测试题列表
                 }
             },
             mounted: function () {
@@ -404,7 +460,8 @@
                 get_exam_data: function () {
                     if (this.show_exam_data.job_id.length == 0 && this.job_name_list.length > 0) {
                         this.show_exam_data.job_id = this.job_name_list[0].uuid;    // 设置默认选中
-
+                    }
+                    if (this.show_exam_data.job_id.length > 0) {
                         this.$http({
                             method: 'post',
                             url: '/api/Company/get_exam_data',
@@ -466,14 +523,68 @@
                 },
                 // 根据岗位获取用户测试题答案数据
                 get_user_answer: function () {
+                    if (this.show_exam_data.job_id.length == 0 && this.job_name_list.length > 0) {
+                        this.show_exam_data.job_id = this.job_name_list[0].uuid;    // 设置默认选中
+                    }
+                    if (this.show_exam_data.job_id.length > 0) {
+                        this.$http({
+                            method: 'post',
+                            url: "/api/company/get_user_answer/" + this.show_exam_data.job_id,
+                            timeout: 3000
+                        }).then(function (response) {
+                            console.info(response.body);
+                            this.user_exam_list.list = response.body.list;
+                            this.user_exam_list.pages = response.body.pages;
+                        });
+                    }
+                },
+                // 根据用户测试题记录表的id 获取指定用户的测试题答案数据
+                get_user_answer_by_id: function (index) {
+                    var id = this.user_exam_list.list[index].id;
+                    this.show_user_answer.user_score_id = id;
+                    this.show_user_answer.uname = this.user_exam_list.list[index].uname;
                     this.$http({
                         method: 'post',
-                        url: "/api/company/get_user_answer/" + this.show_exam_data.job_id,
+                        url: "/api/company/get_user_answer_by_id/" + id,
                         timeout: 3000
                     }).then(function (response) {
                         console.info(response.body);
+                        this.show_user_answer.list = response.body;
+                        this.show_user_answer.show = true;
                     });
-                    
+                },
+                // 返回按钮, 切换到用户测试题列表页
+                change_show_user_answer: function () {
+                    this.show_user_answer.show = false;
+                },
+                // 设置用户笔试题的分数
+                set_user_score: function () {
+                    var id = this.show_user_answer.user_score_id;
+                    this.$http({
+                        method: 'post',
+                        url: "/api/company/set_user_score/" + id,
+                        timeout: 3000,
+                        body: { score: this.show_user_answer.score }
+                    }).then(function (response) {
+                        console.info(response.body);
+                        alert(response.body);
+                        location.reload();
+                    });
+                },
+                // 设置或者清除邀请码
+                set_invitation_code: function (index) {
+                    this.$http({
+                        method: 'post',
+                        url: "/api/company/set_invitation_code/" + this.user_exam_list.list[index].id,
+                        timeout: 3000
+                    }).then(function (response) {
+                        console.info(response.body);
+                        if (response.body.result = true) {
+                            this.user_exam_list.list[index].invitation_code = response.body.message;
+                        } else {
+                            alert(response.body.message);
+                        }
+                    });
                 }
             }
         });

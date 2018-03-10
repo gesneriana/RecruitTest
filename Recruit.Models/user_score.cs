@@ -39,6 +39,9 @@ namespace Recruit.Models
         /// </summary>
         public int eq_score { get; set; }
 
+        [MaxLength(8)]
+        public string invitation_code { get; set; } = string.Empty;
+
         /// <summary>
         /// 添加时间, 默认为当前时间
         /// </summary>
