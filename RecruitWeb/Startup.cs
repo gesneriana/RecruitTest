@@ -58,7 +58,7 @@ namespace RecruitWeb
 
                 default:
                     // 默认使用mysql
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("npgsql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
             }
             #endregion
