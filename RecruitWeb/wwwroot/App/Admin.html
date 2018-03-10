@@ -475,7 +475,6 @@
                             timeout: 3000,
                             body: { job_id: this.show_exam_data.job_id }
                         }).then(function (response) {
-                            console.info(response.body);
                             this.show_exam_data.list = response.body.list;
                             this.show_exam_data.pages = response.body.pages;
                         });
@@ -539,7 +538,6 @@
                             url: "/api/company/get_user_answer/" + this.show_exam_data.job_id,
                             timeout: 3000
                         }).then(function (response) {
-                            console.info(response.body);
                             this.user_exam_list.list = response.body.list;
                             this.user_exam_list.pages = response.body.pages;
                         });
