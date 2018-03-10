@@ -50,10 +50,10 @@ namespace RecruitWeb
                     services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("npgsql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
                 case "sqlserver":
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("sqlserver_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseSqlServer(Configuration.GetValue<string>("sqlserver_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
                 case "mysql":
-                    services.AddDbContext<RecruitDbContext>(option => option.UseNpgsql(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
+                    services.AddDbContext<RecruitDbContext>(option => option.UseMySQL(Configuration.GetValue<string>("mysql_connstr"), b => b.MigrationsAssembly("RecruitWeb")));
                     break;
 
                 default:
