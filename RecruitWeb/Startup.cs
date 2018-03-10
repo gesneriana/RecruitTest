@@ -107,12 +107,14 @@ namespace RecruitWeb
                                 npgsql_init.InitDatabaseData().Wait();
                                 break;
                             case "sqlserver":
+                                var sqlserver_init = new RecruitWebSqlServerDataInitializer(dbContext);
+                                sqlserver_init.InitTableSchema().Wait();
+                                sqlserver_init.InitDatabaseData().Wait();
+                                break;
+                            case "mysql":
                                 var mysql_init = new RecruitWebMySQLDataInitializer(dbContext);
                                 mysql_init.InitTableSchema().Wait();
                                 mysql_init.InitDatabaseData().Wait();
-                                break;
-                            case "mysql":
-                                
                                 break;
 
                             default:
