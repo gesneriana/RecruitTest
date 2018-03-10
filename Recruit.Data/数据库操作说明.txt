@@ -3,14 +3,5 @@
 初始化创建数据库,创建表, 但是索引和唯一键需要在初始化器中使用sql命令操作,
 这部分内容较少并且跨平台性强, 基本上不用做修改
 
-Update-Database –TargetMigration:"201309201643300_AddCity.cs"
-
-版本回溯
-
-Update-Database -Verbose
-
-查看执行的sql语句
-
-Update-Database -Script -SourceMigration:"201309201643300_AddCity.cs" -TargetMigration:"201309201708043_ModifyCity.cs"
-
-生成不同的版本之间的sql脚本, 例如 alter 语句
+因为pgsql数据库区分大小写, 并且默认把表名和字段名转换小写, 所以命名规则是全小写, 中间以下划线隔开
+这样可以保证最大的数据库移植性, 否则需要自己在初始化的代码自行处理

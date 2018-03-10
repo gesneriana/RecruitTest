@@ -267,5 +267,49 @@ namespace RecruitWeb.Controllers
             }
         }
 
+        /// <summary>
+        /// 获取邀请码列表
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult get_invitation_code_list()
+        {
+            ErrorRequestData err = null;
+
+            try
+            {
+                var list = from s in dbContext.user_score
+                           join t in dbContext.job_type on s.job_id equals t.uuid
+                           join u in dbContext.recruit_user on t.user_id equals u.uuid
+                           where s.user_id.Equals(signedUser.user_uuid) && s.invitation_code.Length > 0
+                           orderby s.addtime
+                           select new
+                           {
+                               u.company_name,
+                               u.company_address,
+                               u.company_contact,
+                               s.invitation_code,
+                               t.job_name
+                           };
+                return Json(list.ToList());
+            }
+            catch (DbUpdateException dbex)
+            {
+                if (dbex.InnerException is PostgresException npge)
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = npge.Detail };
+                }
+                else
+                {
+                    err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = dbex.Message };
+                }
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+            catch (Exception ex)
+            {
+                err = new ErrorRequestData() { HttpStatusCode = 500, ErrorMessage = ex.Message };
+                return new ContentResult() { StatusCode = err.HttpStatusCode, Content = err.toJosnString(), ContentType = ConstantTypeString.JsonContentType };
+            }
+        }
+
     }
 }

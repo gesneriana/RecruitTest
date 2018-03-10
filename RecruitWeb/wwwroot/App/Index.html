@@ -18,7 +18,7 @@
                 <div v-show="hasToken" class="col-lg-10">
                     <ul class="nav nav-tabs" role="tablist">
                         <li role="presentation" class="active"><a href="#company_list" role="tab" data-toggle="tab">公司列表</a></li>
-                        <li role="presentation"><a role="tab" @click="" data-toggle="tab" href="#invit_code">查看面试邀请码</a></li>
+                        <li role="presentation"><a href="#invit_code" role="tab" @click="get_invitation_code_list" data-toggle="tab">查看面试邀请码</a></li>
                     </ul>
                 </div>
 
@@ -106,8 +106,25 @@
                     </div>
                 </div>
 
-                <div role="tabpanel" class="tab-pane" id="invit_code">
-                    面试邀请
+                <div role="tabpanel" class="tab-pane container-fluid" id="invit_code">
+                    <div class="row">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td>公司名称</td>
+                                <td>公司地址</td>
+                                <td>公司联系方式</td>
+                                <td>岗位名称</td>
+                                <td>邀请码</td>
+                            </tr>
+                            <tr v-for="(item,index) in invitation_code_list">
+                                <td>{{item.company_name}}</td>
+                                <td>{{item.company_address}}</td>
+                                <td>{{item.company_contact}}</td>
+                                <td>{{item.job_name}}</td>
+                                <td>{{item.invitation_code}}</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -294,7 +311,8 @@
                 search_company_data: {
                     company_condition: 'com_name',
                     company_keywords: ''    // 搜索公司的条件类型和关键字
-                }
+                },
+                invitation_code_list: {}    // 邀请码列表
             },
 
 
@@ -564,6 +582,19 @@
                             }
                         });
                     }
+                },
+                // 获取所有邀请码列表, 暂不分页显示
+                get_invitation_code_list: function () {
+                    if (this.invitation_code_list.length > 0) {
+                        return; // 已经加载过数据
+                    }
+                    this.$http({
+                        method: 'post',
+                        url: '/api/recruit/get_invitation_code_list',
+                        timeout: 3000
+                    }).then(function (response) {
+                        this.invitation_code_list = response.body;
+                    });
                 }
             }
         });
