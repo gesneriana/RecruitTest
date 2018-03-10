@@ -97,9 +97,33 @@ namespace RecruitWeb
                     var hasCreated = dbContext.Database.EnsureCreated();    // 这个代码是发布以后方便其他的一件部署的功能
                     if (hasCreated)
                     {
-                        var dbInitializer = new RecruitWebSampleDataInitializer(dbContext);
-                        dbInitializer.InitTableSchema().Wait();
-                        dbInitializer.InitDatabaseData().Wait();
+                        #region 根据配置文件加载不同的数据库
+                        var DbServerName = Configuration.GetValue<string>("DbServerName");
+                        switch (DbServerName)
+                        {
+                            case "npgsql":
+                                var npgsql_init = new RecruitWebNpgsqlDataInitializer(dbContext);
+                                npgsql_init.InitTableSchema().Wait();
+                                npgsql_init.InitDatabaseData().Wait();
+                                break;
+                            case "sqlserver":
+                                var mysql_init = new RecruitWebMySQLDataInitializer(dbContext);
+                                mysql_init.InitTableSchema().Wait();
+                                mysql_init.InitDatabaseData().Wait();
+                                break;
+                            case "mysql":
+                                
+                                break;
+
+                            default:
+                                // 默认使用mysql
+                                var init = new RecruitWebNpgsqlDataInitializer(dbContext);
+                                init.InitTableSchema().Wait();
+                                init.InitDatabaseData().Wait();
+                                break;
+                        }
+                        #endregion
+
                     }
                 }
             }
