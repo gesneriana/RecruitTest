@@ -13,3 +13,8 @@ sqlserver_connstr
 dotnet RecruitWeb.dll
 
 更多部署方式, 例如iis部署, linux部署, 可以看.net core的官方文档
+
+
+默认测试数据有两个账号
+普通用户 用户名:17666293366 密码:angel.
+公司用户 用户名:17665271050 密码:kotori.
