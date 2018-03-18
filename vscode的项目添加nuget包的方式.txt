@@ -1,0 +1,43 @@
+关于vscode添加nuget包和程序集的方式, 注意以下xml文件的结构
+
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+<!--项目的sdk版本-->
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+  <!--引用的nuget包-->
+    <PackageReference Include="JWT" Version="3.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCaching" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.ResponseCompression" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
+    <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="6.10.6" />
+    <PackageReference Include="npgsql" Version="3.2.6" />
+    <PackageReference Include="npgsql.entityframeworkcore.postgresql" Version="2.0.1" />
+    <PackageReference Include="Pomelo.Data.MySql" Version="1.0.0" />
+    <PackageReference Include="vue-resource" Version="1.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--引用的项目-->
+    <ProjectReference Include="..\Recruit.Data\Recruit.Data.csproj" />
+    <ProjectReference Include="..\Recruit.Models\Recruit.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+  <!--引用的程序集-->
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\..\Antistop\packages\HtmlAgilityPack.1.7.1\lib\netstandard2.0\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Target Name="GatherAllFilesToPublish">
+  </Target>
+</Project>
